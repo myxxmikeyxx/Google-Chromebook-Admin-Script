@@ -185,8 +185,8 @@ function listChomeDevices() {
       var rows = [],
         data;
 
-      for (i = 0; i < dataSet.length; i++) {
-        data = dataSet[i];
+      for (i = 0; i < allDevices.length; i++) {
+        data = allDevices[i];
         rows.push([data.id, data.name]);
       }
 
