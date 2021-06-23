@@ -47,9 +47,9 @@ function menuItem3() {
   // SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
   //   .alert('You clicked the second menu item!');
   listChomeDevices();
-  setHeader();
-  filterSheet();
-  moveColumns();
+  // setHeader();
+  // filterSheet();
+  // moveColumns();
 }
 
 function menuItem4() {
@@ -108,7 +108,7 @@ function clearSheet() {
   if (maxColumn < letterToColumn('U')) {
     // sheet.insertColumns(maxColumn, headers.length - maxColumn);
     sheet.insertColumns(maxColumn, letterToColumn('U') - maxColumn);
-  // } else if (maxColumn == headers.length) {
+    // } else if (maxColumn == headers.length) {
   } else if (maxColumn == letterToColumn('U')) {
     // Do nothing
   } else {
@@ -181,10 +181,24 @@ function listChomeDevices() {
       if (allDevices.length > maxRow) {
         sheet.insertRows(maxRow, (allDevices.length - maxRow));
       }
-      var allDeviceInfo = allDeviceInfo.concat(allDevices);
-      Browser.msgBox("All Devices: \n" + allDevices);
-      Browser.msgBox("All Devices INFO: \n" + allDeviceInfo);
+
+      var rows = [],
+        data;
+
+      for (i = 0; i < dataSet.length; i++) {
+        data = dataSet[i];
+        rows.push([data.id, data.name]);
+      }
+
+      dataRange = sheet.getRange(1, 1, rows.length, 2);
+      dataRange.setValues(rows);
+
+      // var allDeviceInfo = [];
+      // for (var i = 0; i < allDevices.length; i++) {
+      //   Browser.msgBox(allDevices[i]);
+      // }
       //setRowsData(sheet, allDevices);
+      // setRowsData(sheet, allDeviceInfo);
     }
     SpreadsheetApp.flush();
   } catch (err) {
