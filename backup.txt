@@ -1,0 +1,126 @@
+// Written by Andrew Stillman for New Visions for Public Schools
+// Published under GNU General Public License, version 3 (GPL-3.0)
+// See restrictions at http://www.opensource.org/licenses/gpl-3.0.html
+
+
+var headers = ['etag', 'Org Unit Path', 'Serial Number', 'Platform Version', 'Device Id', 'Status', 'Last Enrollment Time',
+  'Firmware Version', 'Last Sync', 'OS Version', 'Boot Mode', 'Annotated Location', 'Notes', 'Annotated User', 'Mac Address'];
+var specialauthId = '0B7-FEGXAo-DGVklteGtFT2trOFU';
+var image1Id = '0B7-FEGXAo-DGZ2txTWFnZ05SVVU';
+var image2Id = '0B7-FEGXAo-DGeTUydWNHTjVDUVE';
+var image3Id = '0B7-FEGXAo-DGRFNxX054S3p4QUE';
+var imageBase = 'https://drive.google.com/uc?export=download&id=';
+
+
+
+function myFunction() {
+
+}
+
+function onOpen() {
+  var ui = SpreadsheetApp.getUi();
+  // Or DocumentApp or FormApp.
+  ui.createMenu('Custom Menu')
+    .addItem('First item', 'menuItem1')
+    .addSeparator()
+    .addSubMenu(ui.createMenu('Sub-menu')
+      .addItem('Second item', 'menuItem2'))
+    .addToUi();
+}
+
+function menuItem1() {
+  SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
+    .alert('You clicked the first menu item!');
+  fetchInventory();
+}
+
+function menuItem2() {
+  SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
+    .alert('You clicked the second menu item!');
+}
+
+function onEdit(e) {
+  // var sheetToWatch= 'Devices Checked out & Returns',
+  // columnToWatch = 2, columnToStamp = 1;
+  //     if (e.range.columnStart !== columnToWatch || e.source.getActiveSheet()
+  //         .getName() !== sheetToWatch || !e.value) return;
+  //     e.source.getActiveSheet()
+  //         .getRange(e.range.rowStart, columnToStamp)
+  //         .setValue(new Date());
+  // columnToWatch = 2, columnToStamp = 12;
+  //     if (e.range.columnStart !== columnToWatch || e.source.getActiveSheet()
+  //         .getName() !== sheetToWatch || !e.value) return;
+  //     e.source.getActiveSheet()
+  //         .getRange(e.range.rowStart, columnToStamp)
+  //     .setFormula("=B3+4");
+}
+
+
+function listChomeDevices() {
+  ScriptProperties.setProperty('adminSDKAuthorized', 'true');
+  var ss = SpreadsheetApp.getActiveSpreadsheet().getId();
+  var sss = SpreadsheetApp.openById(ss).getActiveSheet();
+  var optionalArgs = {
+    maxResults: 100,
+    orderBy: 'SERIAL_NUMBER',
+    projection: 'BASIC'
+  };
+  var response = AdminDirectory.Chromeosdevices.list('my_customer', optionalArgs);
+  var devices = response.chromeosdevices;
+  if (devices && devices.length > 0) {
+    Logger.log('Devices:');
+    for (i = 0; i < devices.length; i++) {
+      var device = devices[i];
+      sss.getRange(i + 1, 1).setValue(device.serialNumber);
+      sss.getRange(i + 1, 2).setValue(device.annotatedAssetId);
+      sss.getRange(i + 1, 3).setValue(device.model);
+    }
+  } else {
+    Logger.log('No users found.');
+  }
+}
+
+function fetchInventory(e) {
+  try {
+    var orgUnit = e.parameter.orgUnit;
+    var allDevices = [];
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheets()[0];
+    sheet.clearContents();
+    var response = AdminDirectory.Chromeosdevices.list('my_customer', { maxResults: 100, projection: "FULL" });
+    allDevices = allDevices.concat(response.chromeosdevices);
+    while (response.nextPageToken) {
+      response = AdminDirectory.Chromeosdevices.list('my_customer', { maxResults: 100, projection: "FULL", pageToken: response.nextPageToken });
+      allDevices = allDevices.concat(response.chromeosdevices);
+    }
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+    SpreadsheetApp.flush();
+    if (orgUnit === "/") {
+      if (allDevices.length > 0) {
+        NVSL.setRowsData(sheet, allDevices);
+      } else {
+        Browser.msgBox("No devices found on the domain.");
+        return;
+      }
+    } else {
+      var filteredDevices = [];
+      for (var i = 0; i < allDevices.length; i++) {
+        if (allDevices[i].orgUnitPath === orgUnit) {
+          filteredDevices.push(allDevices[i]);
+        }
+      }
+      if (filteredDevices.length > 0) {
+        NVSL.setRowsData(sheet, filteredDevices);
+      } else {
+        Browser.msgBox("No devices found in this OU.");
+        return;
+      }
+    }
+    chromebookInventory_logExport();
+    Browser.msgBox("Chromebook inventory download complete!");
+  } catch (err) {
+    Browser.msgBox(err.message);
+  }
+}
+
+
