@@ -170,9 +170,7 @@ function listChomeDevices() {
     SpreadsheetApp.flush();
 
     var response = AdminDirectory.Chromeosdevices.list('my_customer', { maxResults: 100, projection: "FULL" });
-    // Browser.msgBox(response);
-    // Browser.msgBox(response.kind);
-    Logger.log(response);
+    // Logger.log(response);
     allDevices = allDevices.concat(response.chromeosdevices);
     while (response.nextPageToken) {
       response = AdminDirectory.Chromeosdevices.list('my_customer', { maxResults: 100, projection: "FULL", pageToken: response.nextPageToken });
@@ -183,7 +181,10 @@ function listChomeDevices() {
       if (allDevices.length > maxRow) {
         sheet.insertRows(maxRow, (allDevices.length - maxRow));
       }
-      setRowsData(sheet, allDevices);
+      var allDeviceInfo = allDeviceInfo.concat(allDevices);
+      Browser.msgBox("All Devices: \n" + allDevices);
+      Browser.msgBox("All Devices INFO: \n" + allDeviceInfo);
+      //setRowsData(sheet, allDevices);
     }
     SpreadsheetApp.flush();
   } catch (err) {
