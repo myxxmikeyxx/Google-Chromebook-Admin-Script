@@ -4,7 +4,7 @@
 
 
 var headers = ['etag', 'Org Unit Path', 'Serial Number', 'Platform Version', 'Device Id', 'Status', 'Last Enrollment Time',
-  'Firmware Version', 'Last Sync', 'OS Version', 'Boot Mode', 'Annotated Location', 'Notes', 'Annotated User', 'Mac Address', 'ANYTHING PUT HERE WILL DO NOTHING'];
+  'Firmware Version', 'Last Sync', 'OS Version', 'Boot Mode', 'Annotated Location', 'Notes', 'Annotated User', 'Mac Address', ''];
 var specialauthId = '0B7-FEGXAo-DGVklteGtFT2trOFU';
 var image1Id = '0B7-FEGXAo-DGZ2txTWFnZ05SVVU';
 var image2Id = '0B7-FEGXAo-DGeTUydWNHTjVDUVE';
@@ -26,7 +26,7 @@ function onOpen() {
     .addSubMenu(ui.createMenu('Sub-menu')
       .addItem('Format Headers', 'menuItem2')
       .addItem('Get Devices', 'menuItem3')
-      .addItem('Get Devices Testing', 'menuItem4')
+      .addItem('--Blank--', 'menuItem4')
       .addItem('Test Filter', 'menuItem5'))
     .addToUi();
 }
@@ -47,17 +47,21 @@ function menuItem3() {
   // SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
   //   .alert('You clicked the second menu item!');
   listChomeDevices();
+  setHeader();
+  filterSheet();
+  moveColumns();
 }
 
 function menuItem4() {
   // SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
   //   .alert('You clicked the second menu item!');
-  testListChomeDevices();
+  moveColumns();
 }
 
 function menuItem5() {
   // SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
   //   .alert('You clicked the second menu item!');
+  setHeader();
   filterSheet();
 }
 
@@ -83,8 +87,6 @@ function clearSheet() {
   var maxRow = sheet.getMaxRows();
   var maxColumn = sheet.getMaxColumns();
 
-
-
   try {
     // Clears all content and Formatting
     sheet.clearContents();
@@ -94,39 +96,42 @@ function clearSheet() {
   }
 
   // Make sure it has at least 100 rows
-  if (maxRow < 100) {
-    sheet.insertRows(maxRow, 100 - maxRow);
-  } else if (maxRow == 100) {
+  if (maxRow < 0) {
+    sheet.insertRows(maxRow, 2 - maxRow);
+  } else if (maxRow == 2) {
     // Do nothing
   } else {
-    sheet.deleteRows(100, maxRow - 100);
+    sheet.deleteRows(2, maxRow - 2);
   }
   // Makes sure it has all headers and one free space
-  if (maxColumn < headers.length) {
-    sheet.insertColumns(maxColumn, headers.length - maxColumn);
-  } else if (maxColumn == headers.length) {
+  // if (maxColumn < headers.length) {
+  if (maxColumn < letterToColumn('U')) {
+    // sheet.insertColumns(maxColumn, headers.length - maxColumn);
+    sheet.insertColumns(maxColumn, letterToColumn('U') - maxColumn);
+  // } else if (maxColumn == headers.length) {
+  } else if (maxColumn == letterToColumn('U')) {
     // Do nothing
   } else {
-    sheet.deleteColumns(headers.length, maxColumn - headers.length);
+    // sheet.deleteColumns(headers.length, maxColumn - headers.length);
+    sheet.deleteColumns(letterToColumn('U'), maxColumn - letterToColumn('U'));
   }
-
 
   sheet.setColumnWidths(1, headers.length, 200);
 
   // Hides unneed columns
-  sheet.hideColumns(letterToColumn('A'));
-  sheet.hideColumns(letterToColumn('D'));
-  sheet.hideColumns(letterToColumn('E'));
-  sheet.hideColumns(letterToColumn('F'));
-  sheet.hideColumns(letterToColumn('G'));
-  sheet.hideColumns(letterToColumn('H'));
-  sheet.hideColumns(letterToColumn('I'));
-  sheet.hideColumns(letterToColumn('J'));
-  sheet.hideColumns(letterToColumn('K'));
-  // sheet.hideColumns(letterToColumn('L'));
-  // sheet.hideColumns(letterToColumn('M'));
-  sheet.hideColumns(letterToColumn('N'));
-  sheet.hideColumns(letterToColumn('O'));
+  // // sheet.hideColumns(letterToColumn('A'));
+  // sheet.hideColumns(letterToColumn('D'));
+  // sheet.hideColumns(letterToColumn('E'));
+  // sheet.hideColumns(letterToColumn('F'));
+  // sheet.hideColumns(letterToColumn('G'));
+  // sheet.hideColumns(letterToColumn('H'));
+  // sheet.hideColumns(letterToColumn('I'));
+  // sheet.hideColumns(letterToColumn('J'));
+  // sheet.hideColumns(letterToColumn('K'));
+  // // sheet.hideColumns(letterToColumn('L'));
+  // // sheet.hideColumns(letterToColumn('M'));
+  // sheet.hideColumns(letterToColumn('N'));
+  // sheet.hideColumns(letterToColumn('O'));
   SpreadsheetApp.flush();
 }
 
@@ -140,38 +145,22 @@ function setHeader() {
   SpreadsheetApp.flush();
 }
 
+function moveColumns() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheets()[0];
+  // sheet.getRange('A:A').moveTo(sheet.getRange('P:P'))
+  // sheet.getRange('B:B').moveTo(sheet.getRange('A:A'))
+  // sheet.deleteColumn(letterToColumn('B'));
+}
 
 function listChomeDevices() {
-  ScriptProperties.setProperty('adminSDKAuthorized', 'true');
-  var ss = SpreadsheetApp.getActiveSpreadsheet().getId();
-  var sss = SpreadsheetApp.openById(ss).getActiveSheet();
-  var optionalArgs = {
-    maxResults: 100,
-    orderBy: 'SERIAL_NUMBER',
-    projection: 'BASIC'
-  };
-  var response = AdminDirectory.Chromeosdevices.list('my_customer', optionalArgs);
-  var devices = response.chromeosdevices;
-  if (devices && devices.length > 0) {
-    Logger.log('Devices:');
-    for (i = 0; i < devices.length; i++) {
-      var device = devices[i];
-      sss.getRange(i + 2, 1).setValue(device.serialNumber);
-      sss.getRange(i + 2, 2).setValue(device.annotatedAssetId);
-      sss.getRange(i + 2, 3).setValue(device.model);
-    }
-  } else {
-    Logger.log('No users found.');
-  }
-}
-function testListChomeDevices() {
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var sheet = ss.getSheets()[0];
     var allDevices = [];
     var maxRow = sheet.getMaxRows();
     sheet.clearContents();
-    if (maxRow > 100) {
+    if (maxRow > 2) {
       clearSheet();
     }
     SpreadsheetApp.flush();
@@ -181,6 +170,9 @@ function testListChomeDevices() {
     SpreadsheetApp.flush();
 
     var response = AdminDirectory.Chromeosdevices.list('my_customer', { maxResults: 100, projection: "FULL" });
+    // Browser.msgBox(response);
+    // Browser.msgBox(response.kind);
+    Logger.log(response);
     allDevices = allDevices.concat(response.chromeosdevices);
     while (response.nextPageToken) {
       response = AdminDirectory.Chromeosdevices.list('my_customer', { maxResults: 100, projection: "FULL", pageToken: response.nextPageToken });
@@ -207,7 +199,7 @@ function filterSheet() {
   var maxRow = sheet.getMaxRows();
 
   // Removes any current filters
-  try {spreadsheet.getActiveSheet().getFilter().remove();} catch (e) { }
+  try { spreadsheet.getActiveSheet().getFilter().remove(); } catch (e) { }
 
   // Creates a Filter View of all values in the "Org Unit Path" (it gets rid of duplicates for us, very helpful)
   // spreadsheet.getRange('B1:' + columnToLetter(maxColumn) + maxRow).createFilter();
