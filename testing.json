@@ -1,0 +1,48 @@
+{"osVersion":"85.0.4183.84",
+    "diskVolumeReports":[
+        {"volumeInfo":[
+            {"storageTotal":"1995472896","volumeId":"/media/archive","storageFree":"1995472896"},
+            {"storageTotal":"12042240","volumeId":"/usr/share/oem","storageFree":"11681792"},
+            {"volumeId":"/media/removable","storageTotal":"1995472896","storageFree":"1995472896"}
+            ]}],
+    "lastEnrollmentTime":"2021-01-25T18:05:14.392Z",
+    "bootMode":"Verified",
+    "annotatedUser":"gadmin4th@greensburg.k12.in.us",
+    "model":"Dell Chromebook 3100",
+    "systemRamTotal":"3990949888",
+    "platformVersion":"13310.59.0 (Official Build) stable-channel octopus",
+    "activeTimeRanges":[
+        {"date":"2021-01-25","activeTime":60000}
+    ],
+    "macAddress":"dc41a992ba26",
+    "lastSync":"2021-01-25T19:15:56.586Z",
+    "cpuStatusReports":[
+        {"cpuUtilizationPercentageInfo":[24],
+            "reportTime":"2021-01-25T18:05:27.296Z"},
+            {"reportTime":"2021-01-25T18:06:27.267Z",
+                "cpuTemperatureInfo":[
+                    {"label":"Core 1\n","temperature":37},
+                    {"label":"Package id 0\n","temperature":37},
+                    {"temperature":37,"label":"Core 0\n"},
+                    {"label":"iwlwifi_1\n","temperature":29}]}],
+    "deviceId":"bf9b0a6d-be3e-4710-a921-98c24558c20e",
+    "kind":"admin#directory#chromeosdevice",
+    "tpmVersionInfo":{
+        "tpmModel":"1",
+        "firmwareVersion":"7921eab30ee34b3e",
+        "vendorSpecific":"784347206654504D",
+        "family":"322e3000",
+        "specLevel":"74",
+        "manufacturer":"43524f53"
+        },
+    "autoUpdateExpiration":"1780297200000",
+    "status":"ACTIVE",
+    "firmwareVersion":"Google_Fleex.11297.141.0",
+    "systemRamFreeReports":[
+        {"systemRamFreeInfo":["2581913600"],
+            "reportTime":"2021-01-25T18:05:27.296Z"}
+            ],
+    "manufactureDate":"2020-12-11",
+    "orgUnitPath":"/Elementary Students/ElementaryChrome/4thGradeChrome",
+    "serialNumber":"F0TK393",
+    "etag":"\"ajuIDY2MlKKzrdUn942df2OCBNkpUIbNakI8lMkbmjA/FRfJivzNeYMenB01rPOqQADu5vA\""}

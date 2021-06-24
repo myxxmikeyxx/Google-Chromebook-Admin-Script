@@ -5,13 +5,6 @@
 
 var headers = ['etag', 'Org Unit Path', 'Serial Number', 'Platform Version', 'Device Id', 'Status', 'Last Enrollment Time',
   'Firmware Version', 'Last Sync', 'OS Version', 'Boot Mode', 'Annotated Location', 'Notes', 'Annotated User', 'Mac Address', ''];
-var specialauthId = '0B7-FEGXAo-DGVklteGtFT2trOFU';
-var image1Id = '0B7-FEGXAo-DGZ2txTWFnZ05SVVU';
-var image2Id = '0B7-FEGXAo-DGeTUydWNHTjVDUVE';
-var image3Id = '0B7-FEGXAo-DGRFNxX054S3p4QUE';
-var imageBase = 'https://drive.google.com/uc?export=download&id=';
-
-
 
 function myFunction() {
 
@@ -47,15 +40,18 @@ function menuItem3() {
   // SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
   //   .alert('You clicked the second menu item!');
   listChomeDevices();
-  // setHeader();
-  // filterSheet();
+  setHeader();
+  filterSheet();
   // moveColumns();
 }
 
 function menuItem4() {
   // SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
   //   .alert('You clicked the second menu item!');
-  moveColumns();
+  // moveColumns();
+  testingListChomeDevices();
+  setHeader();
+  filterSheet();
 }
 
 function menuItem5() {
@@ -118,6 +114,8 @@ function clearSheet() {
 
   sheet.setColumnWidths(1, headers.length, 200);
 
+  // sheet.insertRows(maxRow, (100-maxRow));
+
   // Hides unneed columns
   // // sheet.hideColumns(letterToColumn('A'));
   // sheet.hideColumns(letterToColumn('D'));
@@ -159,6 +157,7 @@ function listChomeDevices() {
     var sheet = ss.getSheets()[0];
     var allDevices = [];
     var maxRow = sheet.getMaxRows();
+    var maxColumn = sheet.getMaxColumns();
     sheet.clearContents();
     if (maxRow > 2) {
       clearSheet();
@@ -181,28 +180,13 @@ function listChomeDevices() {
       if (allDevices.length > maxRow) {
         sheet.insertRows(maxRow, (allDevices.length - maxRow));
       }
-
-      var rows = [],
-        data;
-
-      for (i = 0; i < allDevices.length; i++) {
-        data = allDevices[i];
-        rows.push([data.id, data.name]);
-      }
-
-      dataRange = sheet.getRange(1, 1, rows.length, 2);
-      dataRange.setValues(rows);
-
-      // var allDeviceInfo = [];
-      // for (var i = 0; i < allDevices.length; i++) {
-      //   Browser.msgBox(allDevices[i]);
-      // }
+      // for (i = 0; i < devices.length; i++) {}
+      //Browser.msgBox(allDevices);
       //setRowsData(sheet, allDevices);
-      // setRowsData(sheet, allDeviceInfo);
     }
     SpreadsheetApp.flush();
   } catch (err) {
-    Browser.msgBox(err.message);
+    Browser.msgBox("Error: " + err.message);
   }
 }
 
@@ -219,5 +203,47 @@ function filterSheet() {
   // Creates a Filter View of all values in the "Org Unit Path" (it gets rid of duplicates for us, very helpful)
   // spreadsheet.getRange('B1:' + columnToLetter(maxColumn) + maxRow).createFilter();
   spreadsheet.getRange('B1:B' + maxRow).createFilter();
+}
+
+
+function testingListChomeDevices() {
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheets()[0];
+    var allDevices = [];
+    var maxRow = sheet.getMaxRows();
+    var maxColumn = sheet.getMaxColumns();
+    sheet.clearContents();
+    if (maxRow > 2) {
+      clearSheet();
+    }
+    SpreadsheetApp.flush();
+
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+    sheet.autoResizeColumn(headers.length);
+    SpreadsheetApp.flush();
+
+    var response = AdminDirectory.Chromeosdevices.list('my_customer', { maxResults: 1, projection: "FULL" });
+    Logger.log("Response: " + response);
+    Logger.log("Response Chrome Devices: " + response.chromeosdevices);
+    // allDevices = allDevices.concat(response.chromeosdevices);
+    allDevices.push(...response.chromeosdevices.pop());
+    setRowsData(sheet, allDevices);
+    // while (response.nextPageToken) {
+    //   response = AdminDirectory.Chromeosdevices.list('my_customer', { maxResults: 100, projection: "FULL", pageToken: response.nextPageToken });
+    //   // allDevices = allDevices.concat(response.chromeosdevices);
+    //   allDevices.push(...response.chromeosdevices);
+    // }
+
+    if (allDevices.length > 0) {
+      if (allDevices.length > maxRow) {
+        sheet.insertRows(maxRow, (allDevices.length - maxRow));
+      }
+      setRowsData(sheet, allDevices);
+    }
+    SpreadsheetApp.flush();
+  } catch (err) {
+    Browser.msgBox("Error: " + err.message);
+  }
 }
 
