@@ -3,8 +3,9 @@
 // See restrictions at http://www.opensource.org/licenses/gpl-3.0.html
 
 
-var headers = ['etag', 'Org Unit Path', 'Serial Number', 'Platform Version', 'Device Id', 'Status', 'Last Enrollment Time',
-  'Firmware Version', 'Last Sync', 'OS Version', 'Boot Mode', 'Annotated Location', 'Notes', 'Annotated User', 'Mac Address', ''];
+// var headers = ['etag', 'Annotated Asset ID', 'Manufacture Date', 'Org Unit Path', 'Serial Number', 'Platform Version', 'Device Id','Status', 'Last Enrollment Time', 'Firmware Version', 'Last Sync', 'OS Version', 'Boot Mode', 'Annotated Location', 'Notes', 'Annotated User', 'Mac Address', ''];
+
+var headers = ['Org Unit Path',	'Annotated User',	'Annotated Location',	'Annotated Asset ID',	'Notes',	'Mac Address',	'Ethernet Mac Address',	'etag',	'Platform Version',	'Device ID',	'Serial Number',	'Status',	'Last Enrollment',	'Recent Users',	'Active Time',	'Model	Firmware Version',	'Last Sync',	'OS Version',	'Boot Mode',	'Support End Date'];
 
 function myFunction() {
 
@@ -50,8 +51,8 @@ function menuItem4() {
   //   .alert('You clicked the second menu item!');
   // moveColumns();
   testingListChomeDevices();
-  setHeader();
-  filterSheet();
+  // setHeader();
+  // filterSheet();
 }
 
 function menuItem5() {
@@ -211,6 +212,8 @@ function testingListChomeDevices() {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var sheet = ss.getSheets()[0];
     var allDevices = [];
+    var deviceKey = [];
+    var deviceValue = [];
     var maxRow = sheet.getMaxRows();
     var maxColumn = sheet.getMaxColumns();
     sheet.clearContents();
@@ -218,29 +221,34 @@ function testingListChomeDevices() {
       clearSheet();
     }
     SpreadsheetApp.flush();
+    var response = AdminDirectory.Chromeosdevices.list('my_customer', { maxResults: 100, projection: "FULL" });
+    allDevices = allDevices.concat(response.chromeosdevices);
+    // Logger.log("Response: " + response);
+    // response.chromeosdevices.forEach(element => Browser.msgBox(element));
+    // allDevices.forEach(element => Browser.msgBox(element));
+    // https://www.freecodecamp.org/news/javascript-foreach-how-to-loop-through-an-array-in-js/
+    // allDevices.forEach(function () {
+    //   // code
+
+    // });
+    // allDevices.forEach(element => {
+    //   Browser.msgBox(element.count);
+    // });
+
+
+    // https://zetcode.com/javascript/jsonforeach/
+    // allDevices.forEach(obj => {
+    //   Object.entries(obj).forEach(([key, value]) => {
+    //     deviceKey.push(key)
+    //     deviceValue.push(value)
+    //     console.log(`${key} ${value}`);
+    //   });
+    //   console.log('-------------------');
+    // });
 
     sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
-    sheet.autoResizeColumn(headers.length);
-    SpreadsheetApp.flush();
-
-    var response = AdminDirectory.Chromeosdevices.list('my_customer', { maxResults: 1, projection: "FULL" });
-    Logger.log("Response: " + response);
-    Logger.log("Response Chrome Devices: " + response.chromeosdevices);
-    // allDevices = allDevices.concat(response.chromeosdevices);
-    allDevices.push(...response.chromeosdevices.pop());
     setRowsData(sheet, allDevices);
-    // while (response.nextPageToken) {
-    //   response = AdminDirectory.Chromeosdevices.list('my_customer', { maxResults: 100, projection: "FULL", pageToken: response.nextPageToken });
-    //   // allDevices = allDevices.concat(response.chromeosdevices);
-    //   allDevices.push(...response.chromeosdevices);
-    // }
 
-    if (allDevices.length > 0) {
-      if (allDevices.length > maxRow) {
-        sheet.insertRows(maxRow, (allDevices.length - maxRow));
-      }
-      setRowsData(sheet, allDevices);
-    }
     SpreadsheetApp.flush();
   } catch (err) {
     Browser.msgBox("Error: " + err.message);
