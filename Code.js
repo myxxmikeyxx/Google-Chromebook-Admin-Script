@@ -35,9 +35,12 @@ function menuItem1() {
 }
 
 function menuItem2() {
-  SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
-    .alert('You clicked the second menu item!');
+  // SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
+  //   .alert('You clicked the second menu item!');
+  // getWidths();
+  filterSheet();
   setHeader();
+  setDetails();
 }
 
 function menuItem3() {
@@ -69,6 +72,15 @@ function menuItem5() {
 }
 
 function onEdit(e) {
+}
+
+function getWidths() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheets()[0];
+  Browser.msgBox(sheet.getColumnWidth(letterToColumn('A')));
+  Browser.msgBox(sheet.getColumnWidth(letterToColumn('B')));
+  Browser.msgBox(sheet.getColumnWidth(letterToColumn('C')));
+  Browser.msgBox(sheet.getColumnWidth(letterToColumn('D')));
 }
 
 function clearSheet() {
@@ -106,10 +118,13 @@ function clearSheet() {
     sheet.deleteColumns(letterToColumn('U'), maxColumn - letterToColumn('U'));
   }
 
-  sheet.setColumnWidths(1, headers.length, 200);
+  sheet.setColumnWidths(1, headers.length, 150);
   //Increase the Org Unit Path Size
-  sheet.setColumnWidths(1, 1, 400);
-  sheet.getRange(1, headers.length + 1).setValue("Blank Column");
+  sheet.setColumnWidths(1, 1, 360);
+  sheet.setColumnWidth(letterToColumn('B'), 145);
+  sheet.setColumnWidth(letterToColumn('C'), 130);
+  sheet.setColumnWidth(letterToColumn('D'), 110);
+  // sheet.getRange(1, headers.length + 1).setValue("Blank Column");
 
   // Hides unneed columns
   //Want to show the first 9 and hide the rest
@@ -122,8 +137,16 @@ function setHeader() {
   var sheet = ss.getSheets()[0];
   sheet.clearFormats();
   sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
-  sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold').setHorizontalAlignment("center");
+  sheet.getRange(1, 1, 1, letterToColumn('D')).setFontWeight('bold').setHorizontalAlignment("center").setBackground('#74b9ff');
+  sheet.getRange(1, letterToColumn('D') + 1, 1, headers.length - letterToColumn('D')).setFontWeight('bold').setHorizontalAlignment("center").setBackground('grey');
   sheet.setFrozenRows(1);
+  SpreadsheetApp.flush();
+}
+
+function setDetails() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheets()[0];
+  sheet.setFrozenColumns(letterToColumn('D'));
   SpreadsheetApp.flush();
 }
 
@@ -178,15 +201,13 @@ function filterSheet() {
   // var maxColumn = sheet.getMaxColumns();
   var maxRow = sheet.getMaxRows();
 
-  // Removes any current filters
-  try { spreadsheet.getActiveSheet().getFilter().remove(); } catch (e) { }
+  // Updates any current filters
+  try {
+    //Hard coded the cell for creating the filter
+    spreadsheet.getRange('A1:A' + maxRow).createFilter().sort(letterToColumn('A'), true);
+    // spreadsheet.getActiveSheet().getFilter().remove(); 
+  } catch (e) { }
 
-  // Creates a Filter View of all values in the "Org Unit Path" (it gets rid of duplicates for us, very helpful)
-  // spreadsheet.getRange('B1:' + columnToLetter(maxColumn) + maxRow).createFilter();
-  // spreadsheet.getRange('B1:B' + maxRow).createFilter();
-
-  //Hard coded the cell for creating the filter
-  spreadsheet.getRange('A1:A' + maxRow).createFilter();
 }
 
 
@@ -204,7 +225,7 @@ function testingListChomeDevices() {
     //the while loop to go throught the rest becuase of response.nextPageToken
     var response = AdminDirectory.Chromeosdevices.list('my_customer', { maxResults: 100, projection: "FULL" });
     allDevices = allDevices.concat(response.chromeosdevices);
-    
+
     /*
     //This grabs all the devices (as long as it has a nextPageToken)
     while (response.nextPageToken) {

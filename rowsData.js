@@ -8,6 +8,10 @@
 //     defaults to the entire first row in sheet.
 //   - optFirstDataRowIndex: index of the first row where data should be written. This
 //     defaults to the row immediately below the headers.
+
+// Browser.msgBox(header.length > 0 && objects[i][header] ? objects[i][header][0].email : "");
+// Browser.msgBox("Length : " + Object.keys(objects[i][header]).length + "\\n \\n Keys : " + Object.keys(objects[i][header]) + "\\n \\n Values : " + Object.values(objects[i][header]) + "\\n \\n Enteries : " + Object.entries(objects[i][header]));
+
 function setRowsData(sheet, objects, optHeadersRange, optFirstDataRowIndex) {
   var headersRange = optHeadersRange || sheet.getRange(1, 1, 1, sheet.getMaxColumns());
   var firstDataRowIndex = optFirstDataRowIndex || headersRange.getRowIndex() + 1;
@@ -18,17 +22,17 @@ function setRowsData(sheet, objects, optHeadersRange, optFirstDataRowIndex) {
     var values = []
     for (j = 0; j < headers.length; ++j) {
       var header = headers[j];
-      if (header.length > 0 && objects[i][header] == "recntUsers"){
-          Browser.msgBox("Found!");
-      }else {
+      if (header == normalizeHeader("Recent Users") && typeof objects[i][header] !== "undefined" && Object.keys(objects[i][header]).length >= 1) {
+        values.push(header.length > 0 && objects[i][header] ? objects[i][header][0].email : "");
+      } else {
       values.push(header.length > 0 && objects[i][header] ? objects[i][header] : "");
       }
     }
     data.push(values);
   }
 
-  var destinationRange = sheet.getRange(firstDataRowIndex, headersRange.getColumnIndex(), 
-                                        objects.length, headers.length);
+  var destinationRange = sheet.getRange(firstDataRowIndex, headersRange.getColumnIndex(),
+    objects.length, headers.length);
   destinationRange.setValues(data);
 }
 // getRowsData iterates row by row in the input range and returns an array of objects.
@@ -43,7 +47,7 @@ function setRowsData(sheet, objects, optHeadersRange, optFirstDataRowIndex) {
 // Returns an Array of objects.
 function getRowsData(sheet, range, columnHeadersRowIndex) {
   var headersIndex = columnHeadersRowIndex || range ? range.getRowIndex() - 1 : 1;
-  var dataRange = range || 
+  var dataRange = range ||
     sheet.getRange(headersIndex + 1, 1, sheet.getMaxRows() - headersIndex, sheet.getMaxColumns());
   var numColumns = dataRange.getEndColumn() - dataRange.getColumn() + 1;
   var headersRange = sheet.getRange(headersIndex, dataRange.getColumn(), 1, numColumns);
@@ -126,7 +130,7 @@ function normalizeHeader(header) {
 // Arguments:
 //   - cellData: string
 function isCellEmpty(cellData) {
-  return typeof(cellData) == "string" && cellData == "";
+  return typeof (cellData) == "string" && cellData == "";
 }
 
 // Returns true if the character char is alphabetical, false otherwise.

@@ -1,4 +1,5 @@
 /.clasp.json
 /appsscript.json
-!/testing.json
+/Test*
+/test*
 /Compare*.*
