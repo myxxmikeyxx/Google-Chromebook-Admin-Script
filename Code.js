@@ -18,7 +18,7 @@ function onOpen() {
       .addItem('Format Headers', 'menuItem2')
       .addItem('Get Devices', 'menuItem3')
       .addItem('--Blank--', 'menuItem4')
-      .addItem('Test Filter', 'menuItem5'))
+      .addItem('Get 100 Devices', 'menuItem5'))
     .addToUi();
 }
 
@@ -49,16 +49,16 @@ function menuItem3() {
 function menuItem4() {
   // SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
   //   .alert('You clicked the second menu item!');
-  clearSheet();
-  setHeader();
-  testingListChomeDevices();
-  setWrap();
-  filterSheet();
+  updateDevices();
 }
 
 function menuItem5() {
   // SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
   //   .alert('You clicked the second menu item!');
+  clearSheet();
+  setHeader();
+  firstListChomeDevices();
+  setWrap();
   setHeader();
   filterSheet();
 }
@@ -149,6 +149,8 @@ function filterSheet() {
   var maxRow = sheet.getMaxRows();
   // Updates any current filters
   try {
+    //Remove Filters
+    ss.getActiveSheet().getFilter().remove();
     //Hard coded the cell for creating the filter
     spreadsheet.getRange('A1:A' + maxRow).createFilter().sort(letterToColumn('A'), true);
   } catch (e) { }
@@ -161,11 +163,12 @@ function listChomeDevices() {
     var sheet = ss.getSheets()[0];
     var allDevices = [];
     SpreadsheetApp.flush();
-    //This grabs the first 100 devices and then will allow 
-    //the while loop to go throught the rest becuase of response.nextPageToken
+    // This grabs the first 100 devices and then will allow 
+    // the while loop to go throught the rest becuase of response.nextPageToken
     var response = AdminDirectory.Chromeosdevices.list('my_customer', { maxResults: 100, projection: "FULL" });
     allDevices = allDevices.concat(response.chromeosdevices);
-    //This grabs all the devices (as long as it has a nextPageToken)
+    // Browser.msgBox(Object.entries(allDevices));
+    // This grabs all the devices (as long as it has a nextPageToken)
     while (response.nextPageToken) {
       response = AdminDirectory.Chromeosdevices.list('my_customer', { maxResults: 100, projection: "FULL", pageToken: response.nextPageToken });
       allDevices = allDevices.concat(response.chromeosdevices);
@@ -173,8 +176,8 @@ function listChomeDevices() {
     //https://stackoverflow.com/questions/1078118/how-do-i-iterate-over-a-json-structure
     // https://www.freecodecamp.org/news/javascript-foreach-how-to-loop-through-an-array-in-js/
     // https://zetcode.com/javascript/jsonforeach/
-    //This just fills in all the data from allDevices 
-    //The the flush is like telling the sheet to refresh to show changes
+    // This just fills in all the data from allDevices 
+    // The the flush is like telling the sheet to refresh to show changes
     Logger.log(allDevices);
     setRowsData(sheet, allDevices);
     SpreadsheetApp.flush();
@@ -183,3 +186,22 @@ function listChomeDevices() {
   }
 }
 
+function firstListChomeDevices() {
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheets()[0];
+    var allDevices = [];
+    SpreadsheetApp.flush();
+    var response = AdminDirectory.Chromeosdevices.list('my_customer', { maxResults: 100, projection: "FULL" });
+    allDevices = allDevices.concat(response.chromeosdevices);
+    Logger.log(allDevices);
+    setRowsData(sheet, allDevices);
+    SpreadsheetApp.flush();
+  } catch (err) {
+    Browser.msgBox("Error: " + err.message);
+  }
+}
+
+function updateDevices(){
+  
+}
