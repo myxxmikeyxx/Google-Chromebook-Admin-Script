@@ -3,6 +3,23 @@
 // See restrictions at http://www.opensource.org/licenses/gpl-3.0.html
 
 
+ allDevices.forEach(obj => {
+      Object.entries(obj).forEach(([key, value], i) => {
+        // console.log(`Key: ${key} || Value: ${value}`);
+        console.log('%d || %s : %s', i, key, value);
+        if (key == "recentUsers"){
+          // value.foreach(([key2, val], x) => {
+          //   if (key2 == "email") {
+          //     Browser.msgBox("Key2: " + key2 + "Value : " + val + "\nIndex : " + x);
+          //     recentUsersEmail.concat(value.email);
+          //     }
+          // });
+        }
+      });
+      console.log('-------------------');
+    });
+
+
 var headers = ['etag', 'Org Unit Path', 'Serial Number', 'Platform Version', 'Device Id', 'Status', 'Last Enrollment Time',
   'Firmware Version', 'Last Sync', 'OS Version', 'Boot Mode', 'Annotated Location', 'Notes', 'Annotated User', 'Mac Address'];
 var specialauthId = '0B7-FEGXAo-DGVklteGtFT2trOFU';

@@ -5,7 +5,10 @@
 
 // var headers = ['etag', 'Annotated Asset ID', 'Manufacture Date', 'Org Unit Path', 'Serial Number', 'Platform Version', 'Device Id','Status', 'Last Enrollment Time', 'Firmware Version', 'Last Sync', 'OS Version', 'Boot Mode', 'Annotated Location', 'Notes', 'Annotated User', 'Mac Address', ''];
 
-var headers = ['Org Unit Path',	'Annotated User',	'Annotated Location',	'Annotated Asset ID',	'Notes',	'Mac Address',	'Ethernet Mac Address',	'etag',	'Platform Version',	'Device ID',	'Serial Number',	'Status',	'Last Enrollment',	'Recent Users',	'Active Time',	'Model	Firmware Version',	'Last Sync',	'OS Version',	'Boot Mode',	'Support End Date'];
+var headers = ['Org Unit Path', 'Annotated Location', 'Annotated Asset ID', 'Serial Number', 'Notes', 'Recent Users', 'Status', 'OS Version', 'Last Sync', 'Annotated User', 'Mac Address', 'Ethernet Mac Address', 'etag', 'Platform Version', 'Device ID', 'Last Enrollment', 'Active Time', 'Model	Firmware Version', 'Boot Mode', 'Support End Date'];
+
+// Not used, furture plan to only show colmns that match these headers
+var visibleHeaders = ['Org Unit Path', 'Annotated Location', 'Annotated Asset ID', 'Serial Number', 'Notes', 'Recent Users', 'Status', 'OS Version', 'Last Sync'];
 
 function myFunction() {
 
@@ -40,19 +43,22 @@ function menuItem2() {
 function menuItem3() {
   // SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
   //   .alert('You clicked the second menu item!');
+  clearSheet();
+  setHeader();
   listChomeDevices();
+  setWrap();
   setHeader();
   filterSheet();
-  // moveColumns();
 }
 
 function menuItem4() {
   // SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
   //   .alert('You clicked the second menu item!');
-  // moveColumns();
+  clearSheet();
+  setHeader();
   testingListChomeDevices();
-  // setHeader();
-  // filterSheet();
+  setWrap();
+  filterSheet();
 }
 
 function menuItem5() {
@@ -114,10 +120,13 @@ function clearSheet() {
   }
 
   sheet.setColumnWidths(1, headers.length, 200);
-
-  // sheet.insertRows(maxRow, (100-maxRow));
+  //Increase the Org Unit Path Size
+  sheet.setColumnWidths(1, 1, 400);
+  sheet.getRange(1, headers.length + 1).setValue("Blank Column");
 
   // Hides unneed columns
+  //Want to show the first 9 and hide the rest
+  sheet.hideColumns(9, headers.length - 9);
   // // sheet.hideColumns(letterToColumn('A'));
   // sheet.hideColumns(letterToColumn('D'));
   // sheet.hideColumns(letterToColumn('E'));
@@ -144,12 +153,13 @@ function setHeader() {
   SpreadsheetApp.flush();
 }
 
-function moveColumns() {
+function setWrap() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheets()[0];
-  // sheet.getRange('A:A').moveTo(sheet.getRange('P:P'))
-  // sheet.getRange('B:B').moveTo(sheet.getRange('A:A'))
-  // sheet.deleteColumn(letterToColumn('B'));
+  var maxRow = sheet.getMaxRows();
+  var maxColumn = sheet.getMaxColumns();
+  sheet.getRange(1, 1, maxRow, maxColumn).setWrap(false);
+  SpreadsheetApp.flush();
 }
 
 function listChomeDevices() {
@@ -159,13 +169,9 @@ function listChomeDevices() {
     var allDevices = [];
     var maxRow = sheet.getMaxRows();
     var maxColumn = sheet.getMaxColumns();
-    sheet.clearContents();
-    if (maxRow > 2) {
-      clearSheet();
-    }
     SpreadsheetApp.flush();
 
-    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+    setHeader();
     sheet.autoResizeColumn(headers.length);
     SpreadsheetApp.flush();
 
@@ -195,7 +201,7 @@ function filterSheet() {
   var spreadsheet = SpreadsheetApp.getActive();
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheets()[0];
-  var maxColumn = sheet.getMaxColumns();
+  // var maxColumn = sheet.getMaxColumns();
   var maxRow = sheet.getMaxRows();
 
   // Removes any current filters
@@ -203,7 +209,10 @@ function filterSheet() {
 
   // Creates a Filter View of all values in the "Org Unit Path" (it gets rid of duplicates for us, very helpful)
   // spreadsheet.getRange('B1:' + columnToLetter(maxColumn) + maxRow).createFilter();
-  spreadsheet.getRange('B1:B' + maxRow).createFilter();
+  // spreadsheet.getRange('B1:B' + maxRow).createFilter();
+
+  //Hard coded the cell for creating the filter
+  spreadsheet.getRange('A1:A' + maxRow).createFilter();
 }
 
 
@@ -212,43 +221,33 @@ function testingListChomeDevices() {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var sheet = ss.getSheets()[0];
     var allDevices = [];
-    var deviceKey = [];
-    var deviceValue = [];
+    var recentUsersEmail = [];
+    var nextStartRow = 0;
     var maxRow = sheet.getMaxRows();
-    var maxColumn = sheet.getMaxColumns();
-    sheet.clearContents();
-    if (maxRow > 2) {
-      clearSheet();
-    }
     SpreadsheetApp.flush();
+
+    //This grabs the first 100 devices and then will allow 
+    //the while loop to go throught the rest becuase of response.nextPageToken
     var response = AdminDirectory.Chromeosdevices.list('my_customer', { maxResults: 100, projection: "FULL" });
     allDevices = allDevices.concat(response.chromeosdevices);
-    // Logger.log("Response: " + response);
-    // response.chromeosdevices.forEach(element => Browser.msgBox(element));
-    // allDevices.forEach(element => Browser.msgBox(element));
+    
+    /*
+    //This grabs all the devices (as long as it has a nextPageToken)
+    while (response.nextPageToken) {
+      response = AdminDirectory.Chromeosdevices.list('my_customer', { maxResults: 100, projection: "FULL", pageToken: response.nextPageToken });
+      allDevices = allDevices.concat(response.chromeosdevices);
+    }
+
+    */
+
+    //https://stackoverflow.com/questions/1078118/how-do-i-iterate-over-a-json-structure
     // https://www.freecodecamp.org/news/javascript-foreach-how-to-loop-through-an-array-in-js/
-    // allDevices.forEach(function () {
-    //   // code
-
-    // });
-    // allDevices.forEach(element => {
-    //   Browser.msgBox(element.count);
-    // });
-
-
     // https://zetcode.com/javascript/jsonforeach/
-    // allDevices.forEach(obj => {
-    //   Object.entries(obj).forEach(([key, value]) => {
-    //     deviceKey.push(key)
-    //     deviceValue.push(value)
-    //     console.log(`${key} ${value}`);
-    //   });
-    //   console.log('-------------------');
-    // });
 
-    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+    //This just fills in all the data from allDevices 
+    //The the flush is like telling the sheet to refresh to show changes
+    Logger.log(allDevices);
     setRowsData(sheet, allDevices);
-
     SpreadsheetApp.flush();
   } catch (err) {
     Browser.msgBox("Error: " + err.message);
