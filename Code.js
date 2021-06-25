@@ -69,19 +69,6 @@ function menuItem5() {
 }
 
 function onEdit(e) {
-  // var sheetToWatch= 'Devices Checked out & Returns',
-  // columnToWatch = 2, columnToStamp = 1;
-  //     if (e.range.columnStart !== columnToWatch || e.source.getActiveSheet()
-  //         .getName() !== sheetToWatch || !e.value) return;
-  //     e.source.getActiveSheet()
-  //         .getRange(e.range.rowStart, columnToStamp)
-  //         .setValue(new Date());
-  // columnToWatch = 2, columnToStamp = 12;
-  //     if (e.range.columnStart !== columnToWatch || e.source.getActiveSheet()
-  //         .getName() !== sheetToWatch || !e.value) return;
-  //     e.source.getActiveSheet()
-  //         .getRange(e.range.rowStart, columnToStamp)
-  //     .setFormula("=B3+4");
 }
 
 function clearSheet() {
@@ -127,19 +114,6 @@ function clearSheet() {
   // Hides unneed columns
   //Want to show the first 9 and hide the rest
   sheet.hideColumns(9, headers.length - 9);
-  // // sheet.hideColumns(letterToColumn('A'));
-  // sheet.hideColumns(letterToColumn('D'));
-  // sheet.hideColumns(letterToColumn('E'));
-  // sheet.hideColumns(letterToColumn('F'));
-  // sheet.hideColumns(letterToColumn('G'));
-  // sheet.hideColumns(letterToColumn('H'));
-  // sheet.hideColumns(letterToColumn('I'));
-  // sheet.hideColumns(letterToColumn('J'));
-  // sheet.hideColumns(letterToColumn('K'));
-  // // sheet.hideColumns(letterToColumn('L'));
-  // // sheet.hideColumns(letterToColumn('M'));
-  // sheet.hideColumns(letterToColumn('N'));
-  // sheet.hideColumns(letterToColumn('O'));
   SpreadsheetApp.flush();
 }
 
