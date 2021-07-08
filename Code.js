@@ -2,11 +2,10 @@
 // Published under GNU General Public License, version 3 (GPL-3.0)
 // See restrictions at http://www.opensource.org/licenses/gpl-3.0.html
 // Updated and Tweaked by Michael Back
+//
+// https://developers.google.com/admin-sdk/directory/reference/rest/v1/chromeosdevices#ChromeOsDevice
 
 var headers = ['Org Unit Path', 'Annotated Location', 'Annotated Asset ID', 'Serial Number', 'Notes', 'Annotated User', 'Recent Users', 'Status', 'OS Version', 'Last Sync', 'Mac Address', 'Ethernet Mac Address', 'etag', 'Platform Version', 'Device ID', 'Last Enrollment', 'Active Time', 'Model	Firmware Version', 'Boot Mode', 'Support End Date'];
-
-// Not used, furture plan to only show colmns that match these headers
-// var visibleHeaders = ['Org Unit Path', 'Annotated Location', 'Annotated Asset ID', 'Serial Number', 'Notes', 'Recent Users', 'Status', 'OS Version', 'Last Sync'];
 
 function onOpen() {
   var ui = SpreadsheetApp.getUi();
@@ -25,7 +24,8 @@ function onOpen() {
       .addItem('For Testing Only', 'hideSheet("Compare")')
       .addSeparator()
       .addItem('Format Headers', 'menuItem2')
-      .addItem('Get 100 Devices', 'menuItem5'))
+      .addItem('Get 100 Devices', 'menuItem5')
+      .addItem('Data Validation', 'menuItem6'))
     .addToUi();
 }
 
@@ -73,8 +73,10 @@ function menuItem1() {
   }
   setHeader('Device Info');
   setHeader('Compare');
+  filterSheet('Device Info');
   filterSheet('Compare');
-  filterSheet('Compare');
+  dataVal('Device Info');
+  dataVal('Compare');
   hideSheet('Compare');
 }
 
@@ -85,9 +87,11 @@ function menuItem2() {
   setHeader('Device Info');
   setDetails('Device Info');
   filterSheet('Device Info');
+  dataVal('Device Info');
   setHeader('Compare');
   setDetails('Compare');
   filterSheet('Compare');
+  dataVal('Compare');
 }
 
 function menuItem3() {
@@ -99,6 +103,7 @@ function menuItem3() {
   setWrap('Device Info');
   setHeader('Device Info');
   filterSheet('Device Info');
+  dataVal('Device Info');
 
   //Now Copy the info to compare sheet  
   showCompare();
@@ -107,6 +112,7 @@ function menuItem3() {
   setWrap('Compare');
   setHeader('Compare');
   filterSheet('Compare');
+  dataVal('Device Info');
   hideSheet('Compare');
   Browser.msgBox("Finished getting devices");
 }
@@ -128,6 +134,7 @@ function menuItem5() {
   setWrap('Device Info');
   setHeader('Device Info');
   filterSheet('Device Info');
+  dataVal('Device Info');
 
   //Now Copy the info to comapre later  
   showCompare();
@@ -136,8 +143,13 @@ function menuItem5() {
   setWrap('Compare');
   setHeader('Compare');
   filterSheet('Compare');
+  dataVal('Compare');
   hideCompare();
   Browser.msgBox("Finished getting devices");
+}
+
+function menuItem6() {
+  dataVal('Device Info');
 }
 
 function firstRun() {
@@ -219,6 +231,8 @@ function createSheets() {
   try {
     ss.insertSheet('Useful Formulas', 4);
     ss.getSheetByName('Useful Formulas');
+    ss.getRange('A1').setValue("\'=IF(ISNA(VLOOKUP(D39,'For Work'!A:K,6, false)),\"\", VLOOKUP(D39,'For Work'!A:K,6, false))");
+    ss.getRange('A2').setValue("\'=IF(ISNA(VLOOKUP(D3,'For Work'!A:K,2, false)),\"\", VLOOKUP(D3,'For Work'!A:K,2, false))");
     //make an array of formuals that are useful and do a for loop to add them to the sheet
   } catch (e) {
     Logger.log("Useful Formulas sheet already exist.");
@@ -364,6 +378,21 @@ function filterSheet(sheetName) {
   }
   //Hard coded the cell for creating the filter
   sheet.getRange('A1:A' + maxRow).createFilter();
+  SpreadsheetApp.flush();
+}
+
+function dataVal(sheetName) {
+  //https://stackoverflow.com/questions/59216381/google-script-retrieving-default-values-for-filter
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName(sheetName);
+  // Set the data validation for cell A2 to require a value from A2:A (lastrow).
+  var cell = sheet.getRange('A2:A' + sheet.getLastRow());
+  var range = sheet.getRange('A2:A' + sheet.getLastRow());
+  var rule = SpreadsheetApp.newDataValidation().requireValueInRange(range).build();
+  cell.setDataValidation(rule);
+  // https://developers.google.com/apps-script/reference/spreadsheet/data-validation
+  // https://developers.google.com/apps-script/reference/spreadsheet/data-validation-builder
+
 }
 
 
@@ -466,7 +495,7 @@ function updateDevices() {
                 //Logger.log("At: " + i + data[i], 'my_customer', data[i].deviceId);
                 updatedCount++;
               } catch (e) {
-                Logger.log("AdminDirectory error at row: " + (i+2) + "\nError Msg: " + e);
+                Logger.log("AdminDirectory error at row: " + (i + 2) + "\nError Msg: " + e);
                 updateFailed = true;
                 continue;
               }
@@ -493,6 +522,8 @@ function updateDevices() {
           setHeader('Compare');
           filterSheet('Device Info');
           filterSheet('Compare');
+          dataVal('Device Info');
+          dataVal('Compare');
           hideSheet('Compare');
           hideSheet('Backup');
         }
