@@ -14,13 +14,40 @@ function onOpen() {
   ui.createMenu('Custom Menu')
     .addItem('First Run', 'menuItem1')
     .addSeparator()
-    .addSubMenu(ui.createMenu('Sub-menu')
+    .addSubMenu(ui.createMenu('Get Devices')
+      .addItem('Get Devices', 'menuItem3'))
+    .addSubMenu(ui.createMenu('Update Devices')
+      .addItem('Update Device Info', 'menuItem4'))
+    .addSeparator()
+    .addSubMenu(ui.createMenu('Testing Zone')
+      .addSeparator()
+      .addItem('Do Not Click Anything', 'showcompare')
+      .addItem('For Testing Only', 'hidecompare')
+      .addSeparator()
       .addItem('Format Headers', 'menuItem2')
-      .addItem('Get Devices', 'menuItem3')
-      .addItem('--Blank--', 'menuItem4')
       .addItem('Get 100 Devices', 'menuItem5'))
     .addToUi();
 }
+
+// function onOpen() {
+//   var ui = SpreadsheetApp.getUi();
+//   // Or DocumentApp or FormApp.
+//   ui.createMenu('Custom Menu')
+//     .addItem('First Run', 'menuItem1')
+//     .addSeparator()
+//     .addSubMenu(ui.createMenu('Manage Devices')
+//       .addItem('Get Devices', 'menuItem3')
+//       .addItem('Update Device Info', 'menuItem4'))
+//       .addSeparator()
+//     .addSubMenu(ui.createMenu('--Testing Zone--')
+//       .addSeparator()
+//       .addItem('Do Not Click Anything', '')
+//       .addItem('For Testing Only', '')
+//       .addSeparator()
+//       .addItem('Format Headers', 'menuItem2')
+//       .addItem('Get 100 Devices', 'menuItem5'))
+//     .addToUi();
+// }
 
 //https://developers.google.com/apps-script/reference/spreadsheet/spreadsheet
 // The onOpen function is executed automatically every time a Spreadsheet is loaded
@@ -39,12 +66,15 @@ function onOpen() {
 function menuItem1() {
   firstRun();
   createSheets();
-  // clearSheet('Device Info');
-  // clearSheet('Compare');
+  var ok = Browser.msgBox('Do you want to clear the sheets? If not click anything other than OK', Browser.Buttons.OK_CANCEL);
+  if (ok == "ok") {
+    clearSheet('Device Info');
+    clearSheet('Compare');
+  }
   setHeader('Device Info');
   setHeader('Compare');
-  sanatizeMacInput('Device Info');
-  // sanatizeMacInput('Compare');
+  filterSheet('Compare');
+  filterSheet('Compare');
   hideCompare();
 }
 
@@ -70,10 +100,10 @@ function menuItem3() {
   setHeader('Device Info');
   filterSheet('Device Info');
 
-  //Now Copy the info to comapre later  
+  //Now Copy the info to compare sheet  
   showCompare();
   clearSheet('Compare');
-  copyToCompare();
+  copyToSheet('Device Info', 'Compare');
   setWrap('Compare');
   setHeader('Compare');
   filterSheet('Compare');
@@ -82,8 +112,6 @@ function menuItem3() {
 }
 
 function menuItem4() {
-  // SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
-  //   .alert('You clicked the second menu item!');
   updateDevices();
 }
 
@@ -104,7 +132,7 @@ function menuItem5() {
   //Now Copy the info to comapre later  
   showCompare();
   clearSheet('Compare');
-  copyToCompare();
+  copyToSheet('Device Info', 'Compare');
   setWrap('Compare');
   setHeader('Compare');
   filterSheet('Compare');
@@ -144,7 +172,7 @@ function createSheets() {
   try {
     ss.insertSheet('Device Info', 0);
   } catch (e) {
-    Logger.log("Sheet already exist.");
+    Logger.log("Device Info sheet already exist.");
     Logger.log(e);
   }
   for (var i = 0; i < sheetsCount; i++) {
@@ -152,26 +180,46 @@ function createSheets() {
     var sheetName = sheet.getName();
     Logger.log(sheetName);
     if (sheetName != "Device Info") {
-      Logger.log("DELETE!" + sheet);
-      // ss.deleteSheet(sheet);
+      if (sheetName != "For Work") {
+        if (sheetName != "Backup") {
+          Logger.log("DELETE! " + sheet);
+          ss.deleteSheet(sheet);
+        }
+      }
     } else {
-      Logger.log("No sheets to delete");
+      Logger.log("No sheets to delete.");
     }
   }
   try {
     ss.insertSheet('Compare', 1);
+    ss.getSheetByName('Compare').hideSheet();
   } catch (e) {
-    Logger.log("Sheet already exist.");
+    ss.getSheetByName('Compare').hideSheet();
+    Logger.log("Compare sheet already exist.");
+    Logger.log(e);
+  }
+  try {
+    ss.insertSheet('For Work', 2);
+  } catch (e) {
+    Logger.log("For Work sheet already exist.");
+    Logger.log(e);
+  }
+  try {
+    ss.insertSheet('Backup', 3);
+    ss.getSheetByName('Backup').hideSheet();
+  } catch (e) {
+    ss.getSheetByName('Backup').hideSheet();
+    Logger.log("Backup sheet already exist.");
     Logger.log(e);
   }
   ss.getSheetByName('Device Info').activate();
 }
 
-function copyToCompare() {
+function copyToSheet(sheetName, copyTo) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName('Compare');
+  var sheet = ss.getSheetByName(copyTo);
   sheet.showSheet();
-  var copyFromSheet = ss.getSheetByName('Device Info');
+  var copyFromSheet = ss.getSheetByName(sheetName);
   //remove all formatting to keep the sheets the same
   try {
     sheet.clearFormats();
@@ -405,10 +453,15 @@ function updateDevices() {
       } else {
         Browser.msgBox(updatedCount + " Chrome devices were updated in the inventory...");
         //After Testing Remove the comments!!!
-        if (updatedCount > 0) {
-          copyToCompare();
+        if (updatedCount >= 0) {
+          //Makes a Backup
+          copyToSheet('Backup', 'Compare');
+          //Updates compare so next update it saves time and tries to update only changed device info
+          copyToSheet('Compare', 'Device Info');
           setHeader('Device Info');
           setHeader('Compare');
+          filterSheet('Device Info');
+          filterSheet('Compare');
           compareTo.hideSheet();
         }
       }
