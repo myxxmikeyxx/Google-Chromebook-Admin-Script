@@ -11,7 +11,7 @@ var headers = ['Org Unit Path', 'Annotated Location', 'Annotated Asset ID', 'Ser
 function onOpen() {
   var ui = SpreadsheetApp.getUi();
   // Or DocumentApp or FormApp.
-  ui.createMenu('Custom Menu')
+  ui.createMenu('Chrome Device Management')
     .addItem('First Run', 'menuItem1')
     .addSeparator()
     .addSubMenu(ui.createMenu('Get Devices')
@@ -141,7 +141,8 @@ function menuItem5() {
 }
 
 function firstRun() {
-  Browser.msgBox("Do not rename the sheets. The script uses the sheets names. \\n If they are changes the script will not work.")
+  Browser.msgBox("Must Have access to google admin and ability to manage chrome devices.");
+  Browser.msgBox("Do not rename the sheets. The script uses the sheets names. \\n If they are changes the script will not work.");
 }
 
 function onEdit(e) {
