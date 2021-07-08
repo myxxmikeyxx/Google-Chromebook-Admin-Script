@@ -22,7 +22,7 @@ function onOpen() {
     .addSubMenu(ui.createMenu('Testing Zone')
       .addSeparator()
       .addItem('Do Not Click Anything', 'showcompare')
-      .addItem('For Testing Only', 'hidecompare')
+      .addItem('For Testing Only', 'hideSheet("Compare")')
       .addSeparator()
       .addItem('Format Headers', 'menuItem2')
       .addItem('Get 100 Devices', 'menuItem5'))
@@ -75,7 +75,7 @@ function menuItem1() {
   setHeader('Compare');
   filterSheet('Compare');
   filterSheet('Compare');
-  hideCompare();
+  hideSheet('Compare');
 }
 
 function menuItem2() {
@@ -107,7 +107,7 @@ function menuItem3() {
   setWrap('Compare');
   setHeader('Compare');
   filterSheet('Compare');
-  hideCompare();
+  hideSheet('Compare');
   Browser.msgBox("Finished getting devices");
 }
 
@@ -141,8 +141,9 @@ function menuItem5() {
 }
 
 function firstRun() {
-  Browser.msgBox("Must Have access to google admin and ability to manage chrome devices.");
+  Browser.msgBox("User must have access to google admin and ability to manage chrome devices.");
   Browser.msgBox("Do not rename the sheets. The script uses the sheets names. \\n If they are changes the script will not work.");
+  // Browser.msgBox("Lastly if a box is blank it is marked as undefined. \\nThis means that it will not change the information in google admin. \\n!!!YOU MUST PUT A SPACE IN THE SPOT TO MAKE IT BLANK IN ADMIN!!!");
 }
 
 function onEdit(e) {
@@ -183,8 +184,10 @@ function createSheets() {
     if (sheetName != "Device Info") {
       if (sheetName != "For Work") {
         if (sheetName != "Backup") {
-          Logger.log("DELETE! " + sheet);
-          ss.deleteSheet(sheet);
+          if (sheetName != "Useful Formulas") {
+            Logger.log("DELETE! " + sheet);
+            ss.deleteSheet(sheet);
+          }
         }
       }
     } else {
@@ -193,9 +196,9 @@ function createSheets() {
   }
   try {
     ss.insertSheet('Compare', 1);
-    ss.getSheetByName('Compare').hideSheet();
+    hideSheet('Compare');
   } catch (e) {
-    ss.getSheetByName('Compare').hideSheet();
+    hideSheet('Compare');
     Logger.log("Compare sheet already exist.");
     Logger.log(e);
   }
@@ -207,10 +210,18 @@ function createSheets() {
   }
   try {
     ss.insertSheet('Backup', 3);
-    ss.getSheetByName('Backup').hideSheet();
+    hideSheet('Backup');
   } catch (e) {
-    ss.getSheetByName('Backup').hideSheet();
+    hideSheet('Backup');
     Logger.log("Backup sheet already exist.");
+    Logger.log(e);
+  }
+  try {
+    ss.insertSheet('Useful Formulas', 4);
+    ss.getSheetByName('Useful Formulas');
+    //make an array of formuals that are useful and do a for loop to add them to the sheet
+  } catch (e) {
+    Logger.log("Useful Formulas sheet already exist.");
     Logger.log(e);
   }
   ss.getSheetByName('Device Info').activate();
@@ -257,9 +268,9 @@ function showCompare() {
   } catch (e) { }
   sheet.activate();
 }
-function hideCompare() {
+function hideSheet(sheetName) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName('Compare');
+  var sheet = ss.getSheetByName(sheetName);
   sheet.hideSheet();
 }
 
@@ -403,7 +414,7 @@ function firstListChomeDevices() {
 
 function updateDevices() {
   var ok = Browser.msgBox('Are you sure?  This will update the Organizational Unit, Annotated User, Annotated Location, and Notes for all devices listed in the sheet', Browser.Buttons.OK_CANCEL);
-  Browser.msgBox("Please wait untill another box pops up before changing anyhting or closing the tab.")
+  Browser.msgBox("Please wait until another box pops up after this one, \n before changing anything or closing the tab.")
   if (ok == "ok") {
     try {
       //https://developers.google.com/apps-script/articles/mail_merge
@@ -414,6 +425,7 @@ function updateDevices() {
       var compareTo = ss.getSheetByName('Compare');
       sanatizeMacInput('Device Info');
       sanatizeMacInput('Compare');
+      sanatizeMacInput('Backup');
       compareTo.showSheet();
       var updateFailed = false;
       if (sheet.getLastRow() > 1) {
@@ -427,21 +439,34 @@ function updateDevices() {
               data[i].annotatedUser != compareData[i].annotatedUser ||
               data[i].annotatedAssetId != compareData[i].annotatedAssetId
             ) {
-              Logger.log("Loop Number : " + i + "\n" +
-                "Row Number : " + (i + 2) + "\n" +
-                data[i].orgUnitPath + ':' + compareData[i].orgUnitPath + "\n" +
-                data[i].annotatedLocation + ':' + compareData[i].annotatedLocation + "\n" +
-                data[i].notes + ':' + compareData[i].notes + "\n" +
-                data[i].annotatedUser + ':' + compareData[i].annotatedUser + "\n" +
-                data[i].annotatedAssetId + ':' + compareData[i].annotatedAssetId);
-              //Must set Recent Users to null beucase it is expecting an object, not a single user like on the sheet
+              // Logger.log("Loop Number : " + i + "\n" +
+              //   "Row Number : " + (i + 2) + "\n" +
+              //   data[i].orgUnitPath + ':' + compareData[i].orgUnitPath + "\n" +
+              //   data[i].annotatedLocation + ':' + compareData[i].annotatedLocation + "\n" +
+              //   data[i].notes + ':' + compareData[i].notes + "\n" +
+              //   data[i].annotatedUser + ':' + compareData[i].annotatedUser + "\n" +
+              //   data[i].annotatedAssetId + ':' + compareData[i].annotatedAssetId);
+              //Sets Recent Users to null becuase it will cause problems if it's not an object
               data[i].recentUsers = null;
               try {
+                //https://developers.google.com/admin-sdk/directory/reference/rest/v1/chromeosdevices#ChromeOsDevice
+                if (data[i].annotatedAssetId == null) {
+                  data[i].annotatedAssetId = '';
+                }
+                if (data[i].annotatedLocation == null) {
+                  data[i].annotatedLocation = '';
+                }
+                if (data[i].annotatedUser == null) {
+                  data[i].annotatedUser = '';
+                }
+                if (data[i].notes == null) {
+                  data[i].notes = '';
+                }
                 AdminDirectory.Chromeosdevices.update(data[i], 'my_customer', data[i].deviceId);
-                Logger.log("At: " + i + data[i], 'my_customer', data[i].deviceId);
+                //Logger.log("At: " + i + data[i], 'my_customer', data[i].deviceId);
                 updatedCount++;
               } catch (e) {
-                Logger.log("AdminDirectory error at: " + i + "\nError Msg: " + e);
+                Logger.log("AdminDirectory error at row: " + (i+2) + "\nError Msg: " + e);
                 updateFailed = true;
                 continue;
               }
@@ -452,18 +477,24 @@ function updateDevices() {
       if (updateFailed) {
         Browser.msgBox("AdminDirectory update error. \\nCheck Logs.");
       } else {
-        Browser.msgBox(updatedCount + " Chrome devices were updated in the inventory...");
-        //After Testing Remove the comments!!!
+        if (updatedCount = 1) {
+          Browser.msgBox(updatedCount + " Chrome device was updated in the inventory...");
+          Logger.log(updatedCount + " Chrome device was updated in the inventory...");
+        } else {
+          Browser.msgBox(updatedCount + " Chrome devices were updated in the inventory...");
+          Logger.log(updatedCount + " Chrome devices were updated in the inventory...");
+        }
         if (updatedCount >= 0) {
           //Makes a Backup
-          copyToSheet('Backup', 'Compare');
+          copyToSheet('Compare', 'Backup');
           //Updates compare so next update it saves time and tries to update only changed device info
-          copyToSheet('Compare', 'Device Info');
+          copyToSheet('Device Info', 'Compare');
           setHeader('Device Info');
           setHeader('Compare');
           filterSheet('Device Info');
           filterSheet('Compare');
-          compareTo.hideSheet();
+          hideSheet('Compare');
+          hideSheet('Backup');
         }
       }
     } catch (err) {
