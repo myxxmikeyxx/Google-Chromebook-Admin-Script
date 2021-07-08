@@ -22,9 +22,10 @@ function setRowsData(sheet, objects, optHeadersRange, optFirstDataRowIndex) {
     var values = []
     for (j = 0; j < headers.length; ++j) {
       var header = headers[j];
-      if (header == normalizeHeader("Recent Users") && typeof objects[i][header] !== "undefined" && Object.keys(objects[i][header]).length >= 1) {
-        values.push(header.length > 0 && objects[i][header] ? objects[i][header][0].email : "");
-      } else {
+      // if (header == normalizeHeader("Recent Users") && typeof objects[i][header] !== "undefined" && Object.keys(objects[i][header]).length >= 1) {
+      //   values.push(header.length > 0 && objects[i][header] ? objects[i][header][0].email : "");
+      // } else 
+      {
       values.push(header.length > 0 && objects[i][header] ? objects[i][header] : "");
       }
     }
