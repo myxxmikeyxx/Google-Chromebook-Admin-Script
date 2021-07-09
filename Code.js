@@ -4,6 +4,8 @@
 // Updated and Tweaked by Michael Back
 //
 // https://developers.google.com/admin-sdk/directory/reference/rest/v1/chromeosdevices#ChromeOsDevice
+// Maybe add
+//https://stackoverflow.com/questions/58064351/is-there-a-way-to-run-two-functions-at-the-same-timesimultaneously-asynchrounou
 
 var headers = ['Org Unit Path', 'Annotated Location', 'Annotated Asset ID', 'Serial Number', 'Notes', 'Annotated User', 'Recent Users', 'Status', 'OS Version', 'Last Sync', 'Mac Address', 'Ethernet Mac Address', 'etag', 'Platform Version', 'Device ID', 'Last Enrollment', 'Active Time', 'Model	Firmware Version', 'Boot Mode', 'Support End Date'];
 
@@ -25,7 +27,9 @@ function onOpen() {
       .addSeparator()
       .addItem('Format Headers', 'menuItem2')
       .addItem('Get 100 Devices', 'menuItem5')
-      .addItem('Data Validation', 'menuItem6'))
+      .addItem('Data Validation', 'menuItem6')
+      .addItem('Filter Testing', 'menuItem7')
+      .addItem('Remove All Sheets', 'menuItem8'))
     .addToUi();
 }
 
@@ -45,7 +49,10 @@ function onOpen() {
 //       .addItem('For Testing Only', '')
 //       .addSeparator()
 //       .addItem('Format Headers', 'menuItem2')
-//       .addItem('Get 100 Devices', 'menuItem5'))
+//       .addItem('Get 100 Devices', 'menuItem5')
+//       .addItem('Data Validation', 'menuItem6')
+//       .addItem('Filter Testing', 'menuItem7')
+//       .addItem('Remove All Sheets', 'menuItem8'))
 //     .addToUi();
 // }
 
@@ -64,6 +71,7 @@ function onOpen() {
 // }
 
 function menuItem1() {
+  // filterTesting();
   firstRun();
   createSheets();
   var ok = Browser.msgBox('Do you want to clear the sheets? If not click anything other than OK', Browser.Buttons.OK_CANCEL);
@@ -151,10 +159,20 @@ function menuItem5() {
 function menuItem6() {
   dataVal('Device Info');
 }
+function menuItem7() {
+  filterTesting();
+}
+
+function menuItem8() {
+  clearAllSheets();
+}
 
 function firstRun() {
-  Browser.msgBox("User must have access to google admin and ability to manage chrome devices.");
-  Browser.msgBox("Do not rename the sheets. The script uses the sheets names. \\n If they are changes the script will not work.");
+  Browser.msgBox("User must have access to google admin and ability to manage chrome devices." +
+    "\\nDo not rename the sheets. The script uses the sheets names. \\n If they are changes the script will not work.");
+
+  Browser.msgBox("Get Devices to update the list of devices. It should only change devices that the information if different on the Compare sheet," +
+    "\\nMeaning if people are in admin chainging items it should not change that information unless you are changing it on the sheet as well, then where is the most recent save/push will be kept.")
   // Browser.msgBox("Lastly if a box is blank it is marked as undefined. \\nThis means that it will not change the information in google admin. \\n!!!YOU MUST PUT A SPACE IN THE SPOT TO MAKE IT BLANK IN ADMIN!!!");
 }
 
@@ -239,6 +257,30 @@ function createSheets() {
     Logger.log(e);
   }
   ss.getSheetByName('Device Info').activate();
+}
+
+function clearAllSheets() {
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheetsCount = ss.getNumSheets();
+  var sheets = ss.getSheets();
+  try {
+    ss.insertSheet('Sheet 1', 0);
+  } catch (e) {
+    Logger.log("Sheet 1 already exist.");
+    Logger.log(e);
+  }
+  for (var i = 0; i < sheetsCount; i++) {
+    var sheet = sheets[i];
+    var sheetName = sheet.getName();
+    Logger.log(sheetName);
+    if (sheetName != "Sheet 1") {
+      Logger.log("DELETE! " + sheet);
+      ss.deleteSheet(sheet);
+    } else {
+      Logger.log("No sheets to delete.");
+    }
+  }
 }
 
 function copyToSheet(sheetName, copyTo) {
@@ -443,7 +485,7 @@ function firstListChomeDevices() {
 
 function updateDevices() {
   var ok = Browser.msgBox('Are you sure?  This will update the Organizational Unit, Annotated User, Annotated Location, and Notes for all devices listed in the sheet', Browser.Buttons.OK_CANCEL);
-  Browser.msgBox("Please wait until another box pops up after this one, \n before changing anything or closing the tab.")
+  Browser.msgBox("After closing this, please wait until another box pops up after this one, \n before changing anything or closing the tab.")
   if (ok == "ok") {
     try {
       //https://developers.google.com/apps-script/articles/mail_merge
@@ -452,6 +494,9 @@ function updateDevices() {
       var ss = SpreadsheetApp.getActiveSpreadsheet();
       var sheet = ss.getSheetByName('Device Info');
       var compareTo = ss.getSheetByName('Compare');
+      var filter = sheet.getFilter();
+      sheet.getFilter().remove();
+      compareTo.getFilter().remove();
       sanatizeMacInput('Device Info');
       sanatizeMacInput('Compare');
       sanatizeMacInput('Backup');
@@ -520,7 +565,8 @@ function updateDevices() {
           copyToSheet('Device Info', 'Compare');
           setHeader('Device Info');
           setHeader('Compare');
-          filterSheet('Device Info');
+          //Applys back the filtered view the user 
+          sheet.getRange('A1:A' + sheet.getLastRow()).createFilter().setColumnFilterCriteria(1, filter);
           filterSheet('Compare');
           dataVal('Device Info');
           dataVal('Compare');
@@ -532,6 +578,14 @@ function updateDevices() {
       Browser.msgBox(err.message);
     }
   }
+}
+
+function filterTesting() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName('Device Info');
+  var filter = sheet.getFilter().getColumnFilterCriteria(1);
+  sheet.getFilter().remove();
+  sheet.getRange('A1:A' + sheet.getLastRow()).createFilter().setColumnFilterCriteria(1, filter);
 }
 
 function getRowsData(sheet, range, columnHeadersRowIndex) {

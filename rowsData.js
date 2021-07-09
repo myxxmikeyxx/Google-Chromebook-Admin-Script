@@ -22,9 +22,13 @@ function setRowsData(sheet, objects, optHeadersRange, optFirstDataRowIndex) {
     var values = []
     for (j = 0; j < headers.length; ++j) {
       var header = headers[j];
-      // if (header == normalizeHeader("Recent Users") && typeof objects[i][header] !== "undefined" && Object.keys(objects[i][header]).length >= 1) {
-      //   values.push(header.length > 0 && objects[i][header] ? objects[i][header][0].email : "");
-      // } else 
+      //This is for shwoing just the most recent user and not the array.
+      if (header == normalizeHeader("Recent Users") && typeof objects[i][header] !== "undefined" && Object.keys(objects[i][header]).length >= 1) {
+        values.push(header.length > 0 && objects[i][header] ? objects[i][header][0].email : "");
+      } else if (header == normalizeHeader("Status") && typeof objects[i][header] == "DEPROVISIONED"){
+        //Do Nothing, I do not want to show Deprovisioned Devices
+        Browser.msgBox("Found a deprovisioned one.");
+      }else
       {
       values.push(header.length > 0 && objects[i][header] ? objects[i][header] : "");
       }
