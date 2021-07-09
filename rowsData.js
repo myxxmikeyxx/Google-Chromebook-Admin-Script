@@ -1,4 +1,5 @@
 // https://gist.github.com/mhawksey/51a1501493787bc5b7f1
+// Tweaked by Michael Back
 // setRowsData fills in one row of data per object defined in the objects Array.
 // For every Column, it checks if data objects define a value for it.
 // Arguments:
@@ -18,26 +19,45 @@ function setRowsData(sheet, objects, optHeadersRange, optFirstDataRowIndex) {
   var headers = normalizeHeaders(headersRange.getValues()[0]);
 
   var data = [];
+  var skipcounter = 0;
   for (var i = 0; i < objects.length; ++i) {
     var values = []
     for (j = 0; j < headers.length; ++j) {
       var header = headers[j];
-      //This is for shwoing just the most recent user and not the array.
+      //This is for showing just the most recent user and not the array.
       if (header == normalizeHeader("Recent Users") && typeof objects[i][header] !== "undefined" && Object.keys(objects[i][header]).length >= 1) {
         values.push(header.length > 0 && objects[i][header] ? objects[i][header][0].email : "");
-      } else if (header == normalizeHeader("Status") && typeof objects[i][header] == "DEPROVISIONED"){
-        //Do Nothing, I do not want to show Deprovisioned Devices
-        Browser.msgBox("Found a deprovisioned one.");
-      }else
-      {
-      values.push(header.length > 0 && objects[i][header] ? objects[i][header] : "");
+      } else {
+        values.push(header.length > 0 && objects[i][header] ? objects[i][header] : "");
       }
     }
-    data.push(values);
+    var skip = false;
+    for (var x = 0; x < values.length; x++) {
+      if (values[x] == "ACTIVE") {
+        skip = true;
+        continue;
+      }
+    }
+    if (skip) {
+      data.push(values);
+    } else {
+      skipcounter++;
+    }
+    // var skip = true;
+    // for (var x = 0; x < values.length; x++) {
+    //   if (values[x] == "DEPROVISIONED" || values[x] == "DISABLED") {
+    //     skip = false;
+    //     skipcounter++;
+    //     continue;
+    //   }
+    // }
+    // if (skip) {
+    //   data.push(values);
+    // }
   }
 
   var destinationRange = sheet.getRange(firstDataRowIndex, headersRange.getColumnIndex(),
-    objects.length, headers.length);
+    (objects.length - skipcounter), headers.length);
   destinationRange.setValues(data);
 }
 // getRowsData iterates row by row in the input range and returns an array of objects.

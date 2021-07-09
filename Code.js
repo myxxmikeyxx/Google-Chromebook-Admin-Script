@@ -74,7 +74,7 @@ function menuItem1() {
   // filterTesting();
   firstRun();
   createSheets();
-  var ok = Browser.msgBox('Do you want to clear the sheets? If not click anything other than OK', Browser.Buttons.OK_CANCEL);
+  var ok = Browser.msgBox('Do you want to clear the sheets? If not click anything other than OK. \\n\\n This will not clear Useful Formulas content.', Browser.Buttons.OK_CANCEL);
   if (ok == "ok") {
     clearSheet('Device Info');
     clearSheet('Compare');
@@ -152,7 +152,7 @@ function menuItem5() {
   setHeader('Compare');
   filterSheet('Compare');
   dataVal('Compare');
-  hideCompare();
+  hideSheet('Compare');
   Browser.msgBox("Finished getting devices");
 }
 
@@ -170,8 +170,8 @@ function menuItem8() {
 function firstRun() {
   Browser.msgBox("User must have access to google admin and ability to manage chrome devices." +
     "\\nDo not rename the sheets. The script uses the sheets names. \\n If they are changes the script will not work.");
-
-  Browser.msgBox("Get Devices to update the list of devices. It should only change devices that the information if different on the Compare sheet," +
+Browser.msgBox("This script should only show 'ACTIVE' Devices.");
+  Browser.msgBox("Get Devices to update the list of devices before making any changes. It should only change devices that the information if different on the Compare sheet," +
     "\\nMeaning if people are in admin chainging items it should not change that information unless you are changing it on the sheet as well, then where is the most recent save/push will be kept.")
   // Browser.msgBox("Lastly if a box is blank it is marked as undefined. \\nThis means that it will not change the information in google admin. \\n!!!YOU MUST PUT A SPACE IN THE SPOT TO MAKE IT BLANK IN ADMIN!!!");
 }
@@ -431,6 +431,7 @@ function dataVal(sheetName) {
   var cell = sheet.getRange('A2:A' + sheet.getLastRow());
   var range = sheet.getRange('A2:A' + sheet.getLastRow());
   var rule = SpreadsheetApp.newDataValidation().requireValueInRange(range).build();
+  cell.clearDataValidations();
   cell.setDataValidation(rule);
   // https://developers.google.com/apps-script/reference/spreadsheet/data-validation
   // https://developers.google.com/apps-script/reference/spreadsheet/data-validation-builder
