@@ -1,17 +1,13 @@
 // Written by Andrew Stillman
 // Published under GNU General Public License, version 3 (GPL-3.0)
 // See restrictions at http://www.opensource.org/licenses/gpl-3.0.html
-// Updated and Tweaked by Michael Back
-//
+// Updated by Michael Back
 // https://developers.google.com/admin-sdk/directory/reference/rest/v1/chromeosdevices#ChromeOsDevice
-// Maybe add
-//https://stackoverflow.com/questions/58064351/is-there-a-way-to-run-two-functions-at-the-same-timesimultaneously-asynchrounou
 
 var headers = ['Org Unit Path', 'Annotated Location', 'Annotated Asset ID', 'Serial Number', 'Notes', 'Annotated User', 'Recent Users', 'Status', 'OS Version', 'Last Sync', 'Mac Address', 'Ethernet Mac Address', 'etag', 'Platform Version', 'Device ID', 'Last Enrollment', 'Active Time', 'Model	Firmware Version', 'Boot Mode', 'Support End Date'];
 
 function onOpen() {
   var ui = SpreadsheetApp.getUi();
-  // Or DocumentApp or FormApp.
   ui.createMenu('Chrome Device Management')
     .addItem('First Run', 'menuItem1')
     .addSeparator()
@@ -35,10 +31,7 @@ function onOpen() {
     .addToUi();
 }
 
-//https://developers.google.com/apps-script/reference/spreadsheet/spreadsheet
-
 function menuItem1() {
-  // filterTesting();
   firstRun();
   createSheets();
   var ok = Browser.msgBox('Do you want to clear the sheets? If not click anything other than OK. \\n\\n This will not clear Useful Formulas content.', Browser.Buttons.OK_CANCEL);
@@ -56,9 +49,6 @@ function menuItem1() {
 }
 
 function menuItem2() {
-  // SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
-  //   .alert('You clicked the second menu item!');
-  // getWidths('Device Info');
   setHeader('Device Info');
   setDetails('Device Info');
   filterSheet('Device Info');
@@ -70,11 +60,9 @@ function menuItem2() {
 }
 
 function menuItem3() {
-  // SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
-  //   .alert('You clicked the second menu item!');
   clearSheet('Device Info');
   setHeader('Device Info');
-  listChomeDevices();
+  listChromeDevices();
   setWrap('Device Info');
   setHeader('Device Info');
   filterSheet('Device Info');
@@ -105,13 +93,13 @@ function menuItem5() {
 
   clearSheet('Device Info');
   setHeader('Device Info');
-  firstListChomeDevices();
+  firstListChromeDevices();
   setWrap('Device Info');
   setHeader('Device Info');
   filterSheet('Device Info');
   dataVal('Device Info');
 
-  //Now Copy the info to comapre later  
+  //Now Copy the info to compare later  
   showCompare();
   clearSheet('Compare');
   copyToSheet('Device Info', 'Compare');
@@ -142,24 +130,22 @@ function firstRun() {
     "\\nDo not rename the sheets. The script uses the sheets names. \\n If they are changes the script will not work.");
   Browser.msgBox("This script should only show 'ACTIVE' Devices.");
   Browser.msgBox("Get Devices to update the list of devices before making any changes. It should only change devices that the information if different on the Compare sheet," +
-    "\\nMeaning if people are in admin chainging items it should not change that information unless you are changing it on the sheet as well, then where is the most recent save/push will be kept.")
-  // Browser.msgBox("Lastly if a box is blank it is marked as undefined. \\nThis means that it will not change the information in google admin. \\n!!!YOU MUST PUT A SPACE IN THE SPOT TO MAKE IT BLANK IN ADMIN!!!");
+    "\\nMeaning if people are in admin changing items it should not change that information unless you are changing it on the sheet as well, then where is the most recent save/push will be kept.")
 }
 
 function onEdit(e) {
+  // Do nothing
 }
 
 function sanatizeMacInput(sheetName) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  // var sheet = ss.getSheets()[0];
   var sheet = ss.getSheetByName(sheetName);
-  //Ser MAC to regular text
+  //Set MAC to regular text
   sheet.getRange(1, letterToColumn('K'), sheet.getLastRow()).setNumberFormat("@");
 }
 
 function getWidths(sheetName) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  // var sheet = ss.getSheets()[0];
   var sheet = ss.getSheetByName(sheetName);
   Browser.msgBox(sheet.getColumnWidth(letterToColumn('A')));
   Browser.msgBox(sheet.getColumnWidth(letterToColumn('B')));
@@ -221,7 +207,7 @@ function createSheets() {
     ss.getSheetByName('Useful Formulas');
     ss.getRange('A1').setValue("\'=IF(ISNA(VLOOKUP(D39,'For Work'!A:K,6, false)),\"\", VLOOKUP(D39,'For Work'!A:K,6, false))");
     ss.getRange('A2').setValue("\'=IF(ISNA(VLOOKUP(D3,'For Work'!A:K,2, false)),\"\", VLOOKUP(D3,'For Work'!A:K,2, false))");
-    //make an array of formuals that are useful and do a for loop to add them to the sheet
+    //make an array of formulas that are useful and do a for loop to add them to the sheet
   } catch (e) {
     Logger.log("Useful Formulas sheet already exist.");
     Logger.log(e);
@@ -302,7 +288,6 @@ function hideSheet(sheetName) {
 
 function clearSheet(sheetName) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  // var sheet = ss.getSheets()[0];
   var sheet = ss.getSheetByName(sheetName);
   var maxRow = sheet.getMaxRows();
   var maxColumn = sheet.getMaxColumns();
@@ -333,7 +318,6 @@ function clearSheet(sheetName) {
 
 function setHeader(sheetName) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  // var sheet = ss.getSheets()[0];
   var sheet = ss.getSheetByName(sheetName);
   sheet.clearFormats();
   sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
@@ -349,8 +333,8 @@ function setHeader(sheetName) {
   sheet.setColumnWidth(letterToColumn('D'), 110);
   sheet.setColumnWidth(letterToColumn('T'), 120);
 
-  // Hides unneed columns
-  //Want to show the first 9 and hide the rest
+  // Hides un-need columns
+  // Want to show the first 9 and hide the rest
   sheet.hideColumns(9, headers.length - 9);
 
   Logger.log("Set Headers for sheet: " + sheetName);
@@ -367,7 +351,6 @@ function setDetails(sheetName) {
 
 function setWrap(sheetName) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  // var sheet = ss.getSheets()[0];
   var sheet = ss.getSheetByName(sheetName);
   var maxRow = sheet.getMaxRows();
   var maxColumn = sheet.getMaxColumns();
@@ -378,7 +361,6 @@ function setWrap(sheetName) {
 
 function filterSheet(sheetName) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  // var sheet = ss.getSheets()[0];
   var sheet = ss.getSheetByName(sheetName);
   var maxRow = sheet.getMaxRows();
   // Updates any current filters
@@ -394,7 +376,6 @@ function filterSheet(sheetName) {
 }
 
 function dataVal(sheetName) {
-  //https://stackoverflow.com/questions/59216381/google-script-retrieving-default-values-for-filter
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName(sheetName);
   // Set the data validation for cell A2 to require a value from A2:A (lastrow).
@@ -403,33 +384,21 @@ function dataVal(sheetName) {
   var rule = SpreadsheetApp.newDataValidation().requireValueInRange(range).build();
   cell.clearDataValidations();
   cell.setDataValidation(rule);
-  // https://developers.google.com/apps-script/reference/spreadsheet/data-validation
-  // https://developers.google.com/apps-script/reference/spreadsheet/data-validation-builder
-
 }
 
 
-function listChomeDevices() {
+function listChromeDevices() {
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var sheet = ss.getSheets()[0];
     var allDevices = [];
     SpreadsheetApp.flush();
-    // This grabs the first 100 devices and then will allow 
-    // the while loop to go throught the rest becuase of response.nextPageToken
     var response = AdminDirectory.Chromeosdevices.list('my_customer', { maxResults: 100, projection: "FULL" });
     allDevices = allDevices.concat(response.chromeosdevices);
-    // Browser.msgBox(Object.entries(allDevices));
-    // This grabs all the devices (as long as it has a nextPageToken)
     while (response.nextPageToken) {
       response = AdminDirectory.Chromeosdevices.list('my_customer', { maxResults: 100, projection: "FULL", pageToken: response.nextPageToken });
       allDevices = allDevices.concat(response.chromeosdevices);
     }
-    //https://stackoverflow.com/questions/1078118/how-do-i-iterate-over-a-json-structure
-    // https://www.freecodecamp.org/news/javascript-foreach-how-to-loop-through-an-array-in-js/
-    // https://zetcode.com/javascript/jsonforeach/
-    // This just fills in all the data from allDevices 
-    // The the flush is like telling the sheet to refresh to show changes
     Logger.log(allDevices);
     setRowsData(sheet, allDevices);
     SpreadsheetApp.flush();
@@ -438,7 +407,7 @@ function listChomeDevices() {
   }
 }
 
-function firstListChomeDevices() {
+function firstListChromeDevices() {
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var sheet = ss.getSheets()[0];
@@ -459,8 +428,6 @@ function updateDevices() {
   Browser.msgBox("After closing this, please wait until another box pops up after this one, \n before changing anything or closing the tab.")
   if (ok == "ok") {
     try {
-      //https://developers.google.com/apps-script/articles/mail_merge
-      //https://stackoverflow.com/questions/45987095/apps-script-getrowsdata-function-deprecated
       var updatedCount = 0;
       var ss = SpreadsheetApp.getActiveSpreadsheet();
       var sheet = ss.getSheetByName('Device Info');
@@ -494,17 +461,8 @@ function updateDevices() {
               data[i].annotatedUser != compareData[i].annotatedUser ||
               data[i].annotatedAssetId != compareData[i].annotatedAssetId
             ) {
-              // Logger.log("Loop Number : " + i + "\n" +
-              //   "Row Number : " + (i + 2) + "\n" +
-              //   data[i].orgUnitPath + ':' + compareData[i].orgUnitPath + "\n" +
-              //   data[i].annotatedLocation + ':' + compareData[i].annotatedLocation + "\n" +
-              //   data[i].notes + ':' + compareData[i].notes + "\n" +
-              //   data[i].annotatedUser + ':' + compareData[i].annotatedUser + "\n" +
-              //   data[i].annotatedAssetId + ':' + compareData[i].annotatedAssetId);
-              //Sets Recent Users to null because it will cause problems if it's not an object
               data[i].recentUsers = null;
               try {
-                //https://developers.google.com/admin-sdk/directory/reference/rest/v1/chromeosdevices#ChromeOsDevice
                 if (data[i].annotatedAssetId == null) {
                   data[i].annotatedAssetId = '';
                 }
@@ -546,7 +504,7 @@ function updateDevices() {
           copyToSheet('Device Info', 'Compare');
           setHeader('Device Info');
           setHeader('Compare');
-          //Applys back the filtered view the user 
+          //Applies back the filtered view the user 
           sheet.getRange('A1:A' + sheet.getLastRow()).createFilter().setColumnFilterCriteria(1, filter);
           filterSheet('Compare');
           dataVal('Device Info');
