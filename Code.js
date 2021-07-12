@@ -170,7 +170,7 @@ function menuItem8() {
 function firstRun() {
   Browser.msgBox("User must have access to google admin and ability to manage chrome devices." +
     "\\nDo not rename the sheets. The script uses the sheets names. \\n If they are changes the script will not work.");
-Browser.msgBox("This script should only show 'ACTIVE' Devices.");
+  Browser.msgBox("This script should only show 'ACTIVE' Devices.");
   Browser.msgBox("Get Devices to update the list of devices before making any changes. It should only change devices that the information if different on the Compare sheet," +
     "\\nMeaning if people are in admin chainging items it should not change that information unless you are changing it on the sheet as well, then where is the most recent save/push will be kept.")
   // Browser.msgBox("Lastly if a box is blank it is marked as undefined. \\nThis means that it will not change the information in google admin. \\n!!!YOU MUST PUT A SPACE IN THE SPOT TO MAKE IT BLANK IN ADMIN!!!");
@@ -496,11 +496,21 @@ function updateDevices() {
       var sheet = ss.getSheetByName('Device Info');
       var compareTo = ss.getSheetByName('Compare');
       var filter = sheet.getFilter();
-      sheet.getFilter().remove();
-      compareTo.getFilter().remove();
-      sanatizeMacInput('Device Info');
-      sanatizeMacInput('Compare');
-      sanatizeMacInput('Backup');
+      try {
+        ss.getSheetByName('Device Info').getRange('A1').clearDataValidations();
+        ss.getSheetByName('Compare').getRange('A1').clearDataValidations();
+        ss.getSheetByName('Device Info').getFilter().remove();
+        ss.getSheetByName('Compare').getFilter().remove();
+      } catch (e) {
+        Logger.log("Filter already removed.");
+      }
+      try {
+        sanatizeMacInput('Device Info');
+        sanatizeMacInput('Compare');
+        sanatizeMacInput('Backup');
+      } catch (e) {
+        Logger.log("Backup Sheet is empty.");
+      }
       compareTo.showSheet();
       var updateFailed = false;
       if (sheet.getLastRow() > 1) {
