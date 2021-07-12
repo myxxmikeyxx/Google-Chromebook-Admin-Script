@@ -53,6 +53,17 @@ function menuItem2() {
   setHeader('Device Info');
   filterSheet('Device Info');
   dataVal('Device Info');
+  
+  // Copies to the backup sheet if the compare sheet is empty (good for first get devices backup)
+  if (isSheetEmpty('Compare')){
+  showSheet('Backup');
+  clearSheet('Backup');
+  copyToSheet('Device Info', 'Backup');
+  setWrap('Backup');
+  setHeader('Backup');
+  dataVal('Backup');
+  hideSheet('Backup');
+  }
 
   //Now Copy the info to compare sheet  
   showSheet('Compare');
