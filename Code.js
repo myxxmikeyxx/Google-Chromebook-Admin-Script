@@ -20,8 +20,9 @@ function onOpen() {
       .addItem('Restore Backup', 'menuItem4'))
     .addSeparator()
     .addSeparator()
-    .addItem('Remove All Sheets', 'menuItem5')
-    .addItem('Show Sheet (Compare)', 'menuItem6')
+    .addSubMenu(ui.createMenu('Extra')
+    .addItem('Remove All Sheets', 'menuItem5'))
+    .addSeparator()
     .addToUi();
 }
 
@@ -73,11 +74,6 @@ function menuItem4() {
 
 function menuItem5() {
   clearAllSheets();
-}
-
-function menuItem6() {
-showSheet('Compare');
-createSheets();
 }
 
 function firstRun() {
