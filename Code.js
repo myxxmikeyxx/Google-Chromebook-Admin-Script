@@ -29,7 +29,7 @@ function onOpen() {
 function menuItem1() {
   firstRun();
   createSheets();
-  var ok = Browser.msgBox('Do you want to clear the sheets? If not click anything other than OK. \\n\\n This will not clear Useful Formulas content.', Browser.Buttons.OK_CANCEL);
+  var ok = Browser.msgBox('Do you want to clear the Device Info and Compare sheet? \\n If not click anything other than OK. \\n\\n This will not clear Useful Formulas content.', Browser.Buttons.OK_CANCEL);
   if (ok == "ok") {
     clearSheet('Device Info');
     clearSheet('Compare');
