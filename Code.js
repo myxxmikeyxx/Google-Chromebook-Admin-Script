@@ -19,6 +19,8 @@ function onOpen() {
       .addItem('Get Devices', 'menuItem3'))
     .addSubMenu(ui.createMenu('Update Devices')
       .addItem('Update Device Info', 'menuItem4'))
+    .addSubMenu(ui.createMenu('Restore Backup')
+      .addItem('Restore Backup', 'menuItem9'))
     .addSeparator()
     .addSubMenu(ui.createMenu('Testing Zone')
       .addSeparator()
@@ -33,42 +35,7 @@ function onOpen() {
     .addToUi();
 }
 
-// function onOpen() {
-//   var ui = SpreadsheetApp.getUi();
-//   // Or DocumentApp or FormApp.
-//   ui.createMenu('Custom Menu')
-//     .addItem('First Run', 'menuItem1')
-//     .addSeparator()
-//     .addSubMenu(ui.createMenu('Manage Devices')
-//       .addItem('Get Devices', 'menuItem3')
-//       .addItem('Update Device Info', 'menuItem4'))
-//       .addSeparator()
-//     .addSubMenu(ui.createMenu('--Testing Zone--')
-//       .addSeparator()
-//       .addItem('Do Not Click Anything', '')
-//       .addItem('For Testing Only', '')
-//       .addSeparator()
-//       .addItem('Format Headers', 'menuItem2')
-//       .addItem('Get 100 Devices', 'menuItem5')
-//       .addItem('Data Validation', 'menuItem6')
-//       .addItem('Filter Testing', 'menuItem7')
-//       .addItem('Remove All Sheets', 'menuItem8'))
-//     .addToUi();
-// }
-
 //https://developers.google.com/apps-script/reference/spreadsheet/spreadsheet
-// The onOpen function is executed automatically every time a Spreadsheet is loaded
-// function onOpen() {
-//   var ss = SpreadsheetApp.getActiveSpreadsheet();
-//   var menuEntries = [];
-//   // When the user clicks on "addMenuExample" then "Menu Entry 1", the function function1 is
-//   // executed.
-//   menuEntries.push({name: "Menu Entry 1", functionName: "function1"});
-//   menuEntries.push(null); // line separator
-//   menuEntries.push({name: "Menu Entry 2", functionName: "function2"});
-
-//   ss.addMenu("addMenuExample", menuEntries);
-// }
 
 function menuItem1() {
   // filterTesting();
@@ -165,6 +132,9 @@ function menuItem7() {
 
 function menuItem8() {
   clearAllSheets();
+}
+function menuItem9() {
+  restoreDevices();
 }
 
 function firstRun() {
@@ -531,7 +501,7 @@ function updateDevices() {
               //   data[i].notes + ':' + compareData[i].notes + "\n" +
               //   data[i].annotatedUser + ':' + compareData[i].annotatedUser + "\n" +
               //   data[i].annotatedAssetId + ':' + compareData[i].annotatedAssetId);
-              //Sets Recent Users to null becuase it will cause problems if it's not an object
+              //Sets Recent Users to null because it will cause problems if it's not an object
               data[i].recentUsers = null;
               try {
                 //https://developers.google.com/admin-sdk/directory/reference/rest/v1/chromeosdevices#ChromeOsDevice
@@ -605,4 +575,81 @@ function getRowsData(sheet, range, columnHeadersRowIndex) {
   var headersRange = sheet.getRange(columnHeadersRowIndex, range.getColumn(), 1, numColumns);
   var headers = headersRange.getValues()[0];
   return getObjects(range.getValues(), normalizeHeaders(headers));
+}
+
+function restoreDevices() {
+  var ok = Browser.msgBox('Are you sure you want to restore from backup?  This will update the Organizational Unit, Annotated User, Annotated Location, and Notes for all devices back to before the last push.', Browser.Buttons.OK_CANCEL);
+  Browser.msgBox("After closing this, please wait until another box pops up after this one, \n before changing anything or closing the tab.")
+  if (isSheetEmpty('Backup') != "") {
+    if (ok == "ok") {
+      try {
+        var updatedCount = 0;
+        var ss = SpreadsheetApp.getActiveSpreadsheet();
+        var sheet = ss.getSheetByName('Backup');
+        try {
+          ss.getSheetByName('Backup').getRange('A1').clearDataValidations();
+          ss.getSheetByName('Backup').getFilter().remove();
+        } catch (e) {
+          Logger.log("Filter already removed on Backup Sheet.");
+        }
+        try {
+          sanatizeMacInput('Backup');
+        } catch (e) {
+        }
+        var updateFailed = false;
+        if (sheet.getLastRow() > 1) {
+          var data = getRowsData(sheet);
+          for (var i = 0; i < data.length; i++) {
+            if (data[i].status === "ACTIVE") {
+              //Sets Recent Users to null because it will cause problems if it's not an object
+              data[i].recentUsers = null;
+              try {
+                if (data[i].annotatedAssetId == null) {
+                  data[i].annotatedAssetId = '';
+                }
+                if (data[i].annotatedLocation == null) {
+                  data[i].annotatedLocation = '';
+                }
+                if (data[i].annotatedUser == null) {
+                  data[i].annotatedUser = '';
+                }
+                if (data[i].notes == null) {
+                  data[i].notes = '';
+                }
+                AdminDirectory.Chromeosdevices.update(data[i], 'my_customer', data[i].deviceId);
+                updatedCount++;
+              } catch (e) {
+                Logger.log("AdminDirectory error at row: " + (i + 2) + "\nError Msg: " + e);
+                updateFailed = true;
+                continue;
+              }
+            }
+          }
+        }
+        if (updateFailed) {
+          Browser.msgBox("AdminDirectory update error. \\nCheck Logs.");
+        } else {
+          if (updatedCount = 1) {
+            Browser.msgBox(updatedCount + " Chrome device was updated in the inventory...");
+            Logger.log(updatedCount + " Chrome device was updated in the inventory...");
+          } else {
+            Browser.msgBox(updatedCount + " Chrome devices were updated in the inventory...");
+            Logger.log(updatedCount + " Chrome devices were updated in the inventory...");
+          }
+          if (updatedCount >= 0) {
+            hideSheet('Backup');
+          }
+        }
+      } catch (err) {
+        Browser.msgBox(err.message);
+      }
+    }
+  } else {
+    Logger.log("Backup Sheet is empty.");
+    Browser.msgBox("Backup Sheet is empty.");
+  }
+}
+
+function isSheetEmpty(sheet) {
+  return sheet.getDataRange().getValues().join("") === "";
 }
