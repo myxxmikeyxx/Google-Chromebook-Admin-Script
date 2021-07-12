@@ -606,3 +606,80 @@ function getRowsData(sheet, range, columnHeadersRowIndex) {
   var headers = headersRange.getValues()[0];
   return getObjects(range.getValues(), normalizeHeaders(headers));
 }
+
+function restoreDevices() {
+  var ok = Browser.msgBox('Are you sure you want to restore from backup?  This will update the Organizational Unit, Annotated User, Annotated Location, and Notes for all devices back to before the last push.', Browser.Buttons.OK_CANCEL);
+  Browser.msgBox("After closing this, please wait until another box pops up after this one, \n before changing anything or closing the tab.")
+  if (isSheetEmpty('Backup') != "") {
+    if (ok == "ok") {
+      try {
+        var updatedCount = 0;
+        var ss = SpreadsheetApp.getActiveSpreadsheet();
+        var sheet = ss.getSheetByName('Backup');
+        try {
+          ss.getSheetByName('Backup').getRange('A1').clearDataValidations();
+          ss.getSheetByName('Backup').getFilter().remove();
+        } catch (e) {
+          Logger.log("Filter already removed on Backup Sheet.");
+        }
+        try {
+          sanatizeMacInput('Backup');
+        } catch (e) {
+        }
+        var updateFailed = false;
+        if (sheet.getLastRow() > 1) {
+          var data = getRowsData(sheet);
+          for (var i = 0; i < data.length; i++) {
+            if (data[i].status === "ACTIVE") {
+              //Sets Recent Users to null because it will cause problems if it's not an object
+              data[i].recentUsers = null;
+              try {
+                if (data[i].annotatedAssetId == null) {
+                  data[i].annotatedAssetId = '';
+                }
+                if (data[i].annotatedLocation == null) {
+                  data[i].annotatedLocation = '';
+                }
+                if (data[i].annotatedUser == null) {
+                  data[i].annotatedUser = '';
+                }
+                if (data[i].notes == null) {
+                  data[i].notes = '';
+                }
+                AdminDirectory.Chromeosdevices.update(data[i], 'my_customer', data[i].deviceId);
+                updatedCount++;
+              } catch (e) {
+                Logger.log("AdminDirectory error at row: " + (i + 2) + "\nError Msg: " + e);
+                updateFailed = true;
+                continue;
+              }
+            }
+          }
+        }
+        if (updateFailed) {
+          Browser.msgBox("AdminDirectory update error. \\nCheck Logs.");
+        } else {
+          if (updatedCount = 1) {
+            Browser.msgBox(updatedCount + " Chrome device was updated in the inventory...");
+            Logger.log(updatedCount + " Chrome device was updated in the inventory...");
+          } else {
+            Browser.msgBox(updatedCount + " Chrome devices were updated in the inventory...");
+            Logger.log(updatedCount + " Chrome devices were updated in the inventory...");
+          }
+          if (updatedCount >= 0) {
+            hideSheet('Backup');
+          }
+        }
+      } catch (err) {
+        Browser.msgBox(err.message);
+      }
+    }
+  } else {
+    Logger.log("Backup Sheet is empty.");
+    Browser.msgBox("Backup Sheet is empty.");
+  }
+}
+
+function isSheetEmpty(sheet) {
+  return sheet.getDataRange().getValues().join("") === "";
+}
