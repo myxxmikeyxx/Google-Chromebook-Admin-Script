@@ -19,6 +19,8 @@ function onOpen() {
       .addItem('Get Devices', 'menuItem3'))
     .addSubMenu(ui.createMenu('Update Devices')
       .addItem('Update Device Info', 'menuItem4'))
+    .addSubMenu(ui.createMenu('Restore Backup')
+      .addItem('Restore Backup', 'menuItem9'))
     .addSeparator()
     .addSubMenu(ui.createMenu('Testing Zone')
       .addSeparator()
@@ -165,6 +167,10 @@ function menuItem7() {
 
 function menuItem8() {
   clearAllSheets();
+}
+
+function menuItem9() {
+  restoreDevices();
 }
 
 function firstRun() {
