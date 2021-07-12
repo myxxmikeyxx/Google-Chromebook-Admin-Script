@@ -37,11 +37,8 @@ function menuItem1() {
     clearSheet('Compare');
   }
   setHeader('Device Info');
-  setHeader('Compare');
   filterSheet('Device Info');
-  filterSheet('Compare');
   dataVal('Device Info');
-  dataVal('Compare');
   hideSheet('Compare');
 }
 
@@ -55,7 +52,7 @@ function menuItem2() {
   dataVal('Device Info');
   
   // Copies to the backup sheet if the compare sheet is empty (good for first get devices backup)
-  if (isSheetEmpty('Compare')){
+  if (isSheetEmpty(SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Compare'))){
   showSheet('Backup');
   clearSheet('Backup');
   copyToSheet('Device Info', 'Backup');
@@ -370,9 +367,10 @@ function dataVal(sheetName) {
   // Does data validation for column A for all the locations. This makes it so you can not miss type a Org unit location
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName(sheetName);
-  // Set the data validation for cell A2 to require a value from A2:A (lastrow).
-  var cell = sheet.getRange('A2:A' + sheet.getLastRow());
-  var range = sheet.getRange('A2:A' + sheet.getLastRow());
+  // Set the data validation for cell A2 to require a value from A2:A (lastrow - 1). 
+  // The -1 is to not count the header row.
+  var cell = sheet.getRange('A2:A' + sheet.getLastRow()-1);
+  var range = sheet.getRange('A2:A' + sheet.getLastRow()-1);
   var rule = SpreadsheetApp.newDataValidation().requireValueInRange(range).build();
   cell.clearDataValidations();
   cell.setDataValidation(rule);
