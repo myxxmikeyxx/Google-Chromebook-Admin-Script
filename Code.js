@@ -23,7 +23,9 @@ function onOpen() {
     .addSubMenu(ui.createMenu('Extra')
     .addItem('Remove All Sheets', 'menuItem5')
     .addSeparator()
-    .addItem('Force Update', 'menuItem6'))
+    .addItem('Force Update', 'menuItem6')
+    .addSeparator()
+    .addItem('Remove and Add Data Val', 'menuItem7'))
     .addSeparator()
     .addToUi();
 }
@@ -88,6 +90,10 @@ function menuItem5() {
 
 function menuItem6() {
   forceUpdateDevices();
+}
+
+function menuItem7 () {
+  dataVal('Device Info');
 }
 
 function firstRun() {
@@ -369,8 +375,8 @@ function dataVal(sheetName) {
   var sheet = ss.getSheetByName(sheetName);
   // Set the data validation for cell A2 to require a value from A2:A (lastrow - 1). 
   // The -1 is to not count the header row.
-  var cell = sheet.getRange('A2:A' + sheet.getLastRow()-1);
-  var range = sheet.getRange('A2:A' + sheet.getLastRow()-1);
+  var cell = sheet.getRange('A2:A' + sheet.getLastRow());
+  var range = sheet.getRange('A2:A' + sheet.getLastRow());
   var rule = SpreadsheetApp.newDataValidation().requireValueInRange(range).build();
   cell.clearDataValidations();
   cell.setDataValidation(rule);
