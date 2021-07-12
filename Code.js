@@ -489,16 +489,15 @@ function getRowsData(sheet, range, columnHeadersRowIndex) {
 }
 
 function restoreDevices() {
-  // A last resort to just push the backup file to google admin
   var ok = Browser.msgBox('Are you sure you want to restore from backup?  This will update the Organizational Unit, Annotated User, Annotated Location, and Notes for all devices back to before the last push.', Browser.Buttons.OK_CANCEL);
   Browser.msgBox("After closing this, please wait until another box pops up after this one, \n before changing anything or closing the tab.")
-  // This checks to see if the Backup sheet is empty and if it is it tells the user and logs it
-  if (isSheetEmpty('Backup') != "") {
+  var updatedCount = 0;
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName('Backup');
+  if (!isSheetEmpty(sheet)) {
+    Browser.msgBox("Inside IF");
     if (ok == "ok") {
       try {
-        var updatedCount = 0;
-        var ss = SpreadsheetApp.getActiveSpreadsheet();
-        var sheet = ss.getSheetByName('Backup');
         try {
           ss.getSheetByName('Backup').getRange('A1').clearDataValidations();
           ss.getSheetByName('Backup').getFilter().remove();
@@ -558,8 +557,8 @@ function restoreDevices() {
       }
     }
   } else {
-    Logger.log("Backup Sheet is empty.");
-    Browser.msgBox("Backup Sheet is empty.");
+    Logger.log("Backup Sheet is empty. " + isSheetEmpty(sheet));
+    Browser.msgBox("Backup Sheet is empty. \\n" + isSheetEmpty(sheet));
   }
 }
 
