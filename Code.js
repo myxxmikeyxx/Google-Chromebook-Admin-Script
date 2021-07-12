@@ -2,6 +2,7 @@
 // Published under GNU General Public License, version 3 (GPL-3.0)
 // See restrictions at http://www.opensource.org/licenses/gpl-3.0.html
 // Updated by Michael Back
+// Github: https://github.com/myxxmikeyxx/Google-Chromebook-Admin-Script
 // https://developers.google.com/admin-sdk/directory/reference/rest/v1/chromeosdevices#ChromeOsDevice
 
 var headers = ['Org Unit Path', 'Annotated Location', 'Annotated Asset ID', 'Serial Number', 'Notes', 'Annotated User', 'Recent Users', 'Status', 'OS Version', 'Last Sync', 'Mac Address', 'Ethernet Mac Address', 'etag', 'Platform Version', 'Device ID', 'Last Enrollment', 'Active Time', 'Model	Firmware Version', 'Boot Mode', 'Support End Date'];
@@ -12,22 +13,15 @@ function onOpen() {
     .addItem('First Run', 'menuItem1')
     .addSeparator()
     .addSubMenu(ui.createMenu('Get Devices')
-      .addItem('Get Devices', 'menuItem3'))
+      .addItem('Get Devices', 'menuItem2'))
     .addSubMenu(ui.createMenu('Update Devices')
-      .addItem('Update Device Info', 'menuItem4'))
+      .addItem('Update Device Info', 'menuItem3'))
     .addSubMenu(ui.createMenu('Restore Backup')
-      .addItem('Restore Backup', 'menuItem9'))
+      .addItem('Restore Backup', 'menuItem4'))
     .addSeparator()
-    .addSubMenu(ui.createMenu('Testing Zone')
-      .addSeparator()
-      .addItem('Do Not Click Anything', 'showcompare')
-      .addItem('For Testing Only', 'hideSheet("Compare")')
-      .addSeparator()
-      .addItem('Format Headers', 'menuItem2')
-      .addItem('Get 100 Devices', 'menuItem5')
-      .addItem('Data Validation', 'menuItem6')
-      .addItem('Filter Testing', 'menuItem7')
-      .addItem('Remove All Sheets', 'menuItem8'))
+    .addSeparator()
+    .addItem('Remove All Sheets', 'menuItem5')
+    .addItem('Show Sheet (Compare)', 'menuItem6')
     .addToUi();
 }
 
@@ -49,17 +43,6 @@ function menuItem1() {
 }
 
 function menuItem2() {
-  setHeader('Device Info');
-  setDetails('Device Info');
-  filterSheet('Device Info');
-  dataVal('Device Info');
-  setHeader('Compare');
-  setDetails('Compare');
-  filterSheet('Compare');
-  dataVal('Compare');
-}
-
-function menuItem3() {
   clearSheet('Device Info');
   setHeader('Device Info');
   listChromeDevices();
@@ -69,7 +52,7 @@ function menuItem3() {
   dataVal('Device Info');
 
   //Now Copy the info to compare sheet  
-  showCompare();
+  showSheet('Compare');
   clearSheet('Compare');
   copyToSheet('Device Info', 'Compare');
   setWrap('Compare');
@@ -80,49 +63,21 @@ function menuItem3() {
   Browser.msgBox("Finished getting devices");
 }
 
-function menuItem4() {
+function menuItem3() {
   updateDevices();
 }
 
+function menuItem4() {
+  restoreDevices();
+}
+
 function menuItem5() {
-  // SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
-  //   .alert('You clicked the second menu item!');
-  //------------
-  //Testing area
-  //------------
-
-  clearSheet('Device Info');
-  setHeader('Device Info');
-  firstListChromeDevices();
-  setWrap('Device Info');
-  setHeader('Device Info');
-  filterSheet('Device Info');
-  dataVal('Device Info');
-
-  //Now Copy the info to compare later  
-  showCompare();
-  clearSheet('Compare');
-  copyToSheet('Device Info', 'Compare');
-  setWrap('Compare');
-  setHeader('Compare');
-  filterSheet('Compare');
-  dataVal('Compare');
-  hideSheet('Compare');
-  Browser.msgBox("Finished getting devices");
+  clearAllSheets();
 }
 
 function menuItem6() {
-  dataVal('Device Info');
-}
-function menuItem7() {
-  filterTesting();
-}
-
-function menuItem8() {
-  clearAllSheets();
-}
-function menuItem9() {
-  restoreDevices();
+showSheet('Compare');
+createSheets();
 }
 
 function firstRun() {
@@ -137,32 +92,27 @@ function onEdit(e) {
   // Do nothing
 }
 
-function sanatizeMacInput(sheetName) {
+function sanitizeMacInput(sheetName) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName(sheetName);
   //Set MAC to regular text
   sheet.getRange(1, letterToColumn('K'), sheet.getLastRow()).setNumberFormat("@");
 }
 
-function getWidths(sheetName) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName(sheetName);
-  Browser.msgBox(sheet.getColumnWidth(letterToColumn('A')));
-  Browser.msgBox(sheet.getColumnWidth(letterToColumn('B')));
-  Browser.msgBox(sheet.getColumnWidth(letterToColumn('C')));
-  Browser.msgBox(sheet.getColumnWidth(letterToColumn('D')));
-}
-
 function createSheets() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheetsCount = ss.getNumSheets();
   var sheets = ss.getSheets();
+  // Makes the sheet or moves it to index 0
   try {
     ss.insertSheet('Device Info', 0);
   } catch (e) {
-    Logger.log("Device Info sheet already exist.");
+    ss.setActiveSheet(ss.getSheetByName('Device Info'));
+    ss.moveActiveSheet(0);
+    Logger.log("Device Info sheet already exist. Moved to index 0.");
     Logger.log(e);
   }
+  // Deletes all sheets that don't match "Device Info", "For Work", "Backup", "Useful Formulas"
   for (var i = 0; i < sheetsCount; i++) {
     var sheet = sheets[i];
     var sheetName = sheet.getName();
@@ -180,28 +130,48 @@ function createSheets() {
       Logger.log("No sheets to delete.");
     }
   }
+  
+  // Makes the sheet or moves it to index 1
   try {
     ss.insertSheet('Compare', 1);
     hideSheet('Compare');
   } catch (e) {
+    ss.setActiveSheet(ss.getSheetByName('Compare'));
+    ss.moveActiveSheet(1);
     hideSheet('Compare');
     Logger.log("Compare sheet already exist.");
     Logger.log(e);
   }
+  
+  // Makes the sheet or moves it to index 2
   try {
+    //If sheet exist it will throw and error and not do the setvalue.
     ss.insertSheet('For Work', 2);
+    ss.setActiveSheet(ss.getSheetByName('For Work'));
+    ss.getRange('A1').setValue("This sheet is for you to copy any data you want to work on. It will not be saved or pushed.")
+      // Put link to video showing a use.
+    ss.getRange('A2').setValue(" ");
   } catch (e) {
+    // Just moves the sheet to the correct spot if it already exist
+    ss.setActiveSheet(ss.getSheetByName('For Work'));
+    ss.moveActiveSheet(2);
     Logger.log("For Work sheet already exist.");
     Logger.log(e);
   }
+  
+  // Makes the sheet or moves it to index 3
   try {
     ss.insertSheet('Backup', 3);
     hideSheet('Backup');
   } catch (e) {
+    ss.setActiveSheet(ss.getSheetByName('Backup'));
+    ss.moveActiveSheet(3);
     hideSheet('Backup');
     Logger.log("Backup sheet already exist.");
     Logger.log(e);
   }
+  
+  // Makes the sheet or moves it to index 4
   try {
     ss.insertSheet('Useful Formulas', 4);
     ss.getSheetByName('Useful Formulas');
@@ -209,6 +179,8 @@ function createSheets() {
     ss.getRange('A2').setValue("\'=IF(ISNA(VLOOKUP(D3,'For Work'!A:K,2, false)),\"\", VLOOKUP(D3,'For Work'!A:K,2, false))");
     //make an array of formulas that are useful and do a for loop to add them to the sheet
   } catch (e) {
+    ss.setActiveSheet(ss.getSheetByName('Useful Formulas'));
+    ss.moveActiveSheet(4);
     Logger.log("Useful Formulas sheet already exist.");
     Logger.log(e);
   }
@@ -216,7 +188,7 @@ function createSheets() {
 }
 
 function clearAllSheets() {
-
+  // This deletes all sheets that are not "Sheet 1".
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheetsCount = ss.getNumSheets();
   var sheets = ss.getSheets();
@@ -240,11 +212,13 @@ function clearAllSheets() {
 }
 
 function copyToSheet(sheetName, copyTo) {
+  // This takes the sheet and what sheet you want to copy to. 
+  // It will clear all filters and formats for both sheets
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName(copyTo);
   sheet.showSheet();
   var copyFromSheet = ss.getSheetByName(sheetName);
-  //remove all formatting to keep the sheets the same
+  // Removes all formatting and filters to keep the sheets the same
   try {
     sheet.clearFormats();
     sheet.getFilter().remove();
@@ -253,16 +227,11 @@ function copyToSheet(sheetName, copyTo) {
   } catch (e) {
 
   }
+  // This gets an array of all the info from the sheet you want to copy from, then copies it to the copyTo sheet.
   var rangeToCopy = copyFromSheet.getRange(1, 1, copyFromSheet.getMaxRows(), copyFromSheet.getMaxColumns());
   if (sheet == null) {
-    Logger.log("Compare Sheet Missing. Adding Sheet Now");
-    try {
-      ss.insertSheet('Compare', 1);
-      ss.getSheetByName('Compare').hideSheet();
-    } catch (e) {
-      Logger.log("Sheet already exist.");
-      Logger.log(e);
-    }
+    // If sheet is null (doesn't exist), then create sheets
+    createSheets();
   }
   rangeToCopy.copyTo(sheet.getRange(1, 1));
   setHeader('Compare');
@@ -270,23 +239,28 @@ function copyToSheet(sheetName, copyTo) {
   SpreadsheetApp.flush();
 }
 
-function showCompare() {
+function showSheet(sheetName) {
+  // Show a hidden sheet
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName('Compare');
+  var sheet = ss.getSheetByName(sheetName);
   try {
-    ss.insertSheet('Compare', 1);
-    sheet = ss.getSheetByName('Compare');
-    sheet.showSheet();
-  } catch (e) { }
-  sheet.activate();
+    sheet.activate().showSheet();
+  } catch (e) { 
+    Logger.log('Sheet already visible') 
+  }
+  SpreadsheetApp.flush();
 }
+
+
 function hideSheet(sheetName) {
+  // Hides the given sheet
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName(sheetName);
   sheet.hideSheet();
 }
 
 function clearSheet(sheetName) {
+  // Clears a sheet's content and formatting and filters
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName(sheetName);
   var maxRow = sheet.getMaxRows();
@@ -317,6 +291,7 @@ function clearSheet(sheetName) {
 }
 
 function setHeader(sheetName) {
+  // Formats the the headers of the given sheet
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName(sheetName);
   sheet.clearFormats();
@@ -343,6 +318,7 @@ function setHeader(sheetName) {
 }
 
 function setDetails(sheetName) {
+  // Freezes the columns of the given sheet to column F
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName(sheetName);
   sheet.setFrozenColumns(letterToColumn('F'));
@@ -350,6 +326,7 @@ function setDetails(sheetName) {
 }
 
 function setWrap(sheetName) {
+  // Sets sheet text to no wrap for all the content.
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName(sheetName);
   var maxRow = sheet.getMaxRows();
@@ -360,6 +337,7 @@ function setWrap(sheetName) {
 }
 
 function filterSheet(sheetName) {
+  // Applies filter to given sheet for Column A
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName(sheetName);
   var maxRow = sheet.getMaxRows();
@@ -376,6 +354,7 @@ function filterSheet(sheetName) {
 }
 
 function dataVal(sheetName) {
+  // Does data validation for column A for all the locations. This makes it so you can not miss type a Org unit location
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName(sheetName);
   // Set the data validation for cell A2 to require a value from A2:A (lastrow).
@@ -388,9 +367,10 @@ function dataVal(sheetName) {
 
 
 function listChromeDevices() {
+  // Gets all Chrome devices and writes them to all needed sheets.
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var sheet = ss.getSheets()[0];
+    var sheet = ss.getSheetByName('Device Info');
     var allDevices = [];
     SpreadsheetApp.flush();
     var response = AdminDirectory.Chromeosdevices.list('my_customer', { maxResults: 100, projection: "FULL" });
@@ -399,22 +379,6 @@ function listChromeDevices() {
       response = AdminDirectory.Chromeosdevices.list('my_customer', { maxResults: 100, projection: "FULL", pageToken: response.nextPageToken });
       allDevices = allDevices.concat(response.chromeosdevices);
     }
-    Logger.log(allDevices);
-    setRowsData(sheet, allDevices);
-    SpreadsheetApp.flush();
-  } catch (err) {
-    Browser.msgBox("Error: " + err.message);
-  }
-}
-
-function firstListChromeDevices() {
-  try {
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var sheet = ss.getSheets()[0];
-    var allDevices = [];
-    SpreadsheetApp.flush();
-    var response = AdminDirectory.Chromeosdevices.list('my_customer', { maxResults: 100, projection: "FULL" });
-    allDevices = allDevices.concat(response.chromeosdevices);
     Logger.log(allDevices);
     setRowsData(sheet, allDevices);
     SpreadsheetApp.flush();
@@ -442,9 +406,9 @@ function updateDevices() {
         Logger.log("Filter already removed.");
       }
       try {
-        sanatizeMacInput('Device Info');
-        sanatizeMacInput('Compare');
-        sanatizeMacInput('Backup');
+        sanitizeMacInput('Device Info');
+        sanitizeMacInput('Compare');
+        sanitizeMacInput('Backup');
       } catch (e) {
         Logger.log("Backup Sheet is empty.");
       }
@@ -519,15 +483,8 @@ function updateDevices() {
   }
 }
 
-function filterTesting() {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName('Device Info');
-  var filter = sheet.getFilter().getColumnFilterCriteria(1);
-  sheet.getFilter().remove();
-  sheet.getRange('A1:A' + sheet.getLastRow()).createFilter().setColumnFilterCriteria(1, filter);
-}
-
 function getRowsData(sheet, range, columnHeadersRowIndex) {
+  // This gives an array of all the with headers as index [0...] and all values at index [0...] [0...]
   columnHeadersRowIndex = columnHeadersRowIndex || range.getRowIndex() - 1;
   var numColumns = range.getEndColumn() - range.getColumn() + 1;
   var headersRange = sheet.getRange(columnHeadersRowIndex, range.getColumn(), 1, numColumns);
@@ -536,8 +493,10 @@ function getRowsData(sheet, range, columnHeadersRowIndex) {
 }
 
 function restoreDevices() {
+  // A last resort to just push the backup file to google admin
   var ok = Browser.msgBox('Are you sure you want to restore from backup?  This will update the Organizational Unit, Annotated User, Annotated Location, and Notes for all devices back to before the last push.', Browser.Buttons.OK_CANCEL);
   Browser.msgBox("After closing this, please wait until another box pops up after this one, \n before changing anything or closing the tab.")
+  // This checks to see if the Backup sheet is empty and if it is it tells the user and logs it
   if (isSheetEmpty('Backup') != "") {
     if (ok == "ok") {
       try {
@@ -551,7 +510,7 @@ function restoreDevices() {
           Logger.log("Filter already removed on Backup Sheet.");
         }
         try {
-          sanatizeMacInput('Backup');
+          sanitizeMacInput('Backup');
         } catch (e) {
         }
         var updateFailed = false;
@@ -609,5 +568,6 @@ function restoreDevices() {
 }
 
 function isSheetEmpty(sheet) {
+  // simple check if a sheet is empty or not
   return sheet.getDataRange().getValues().join("") === "";
 }
