@@ -21,7 +21,9 @@ function onOpen() {
     .addSeparator()
     .addSeparator()
     .addSubMenu(ui.createMenu('Extra')
-    .addItem('Remove All Sheets', 'menuItem5'))
+    .addItem('Remove All Sheets', 'menuItem5')
+    .addSeparator()
+    .addItem('Force Update', 'menuItem6'))
     .addSeparator()
     .addToUi();
 }
@@ -74,6 +76,10 @@ function menuItem4() {
 
 function menuItem5() {
   clearAllSheets();
+}
+
+function menuItem6() {
+  forceUpdateDevices();
 }
 
 function firstRun() {
@@ -385,14 +391,18 @@ function listChromeDevices() {
 
 function updateDevices() {
   var ok = Browser.msgBox('Are you sure?  This will update the Organizational Unit, Annotated User, Annotated Location, and Notes for all devices listed in the sheet', Browser.Buttons.OK_CANCEL);
-  Browser.msgBox("After closing this, please wait until another box pops up after this one, \n before changing anything or closing the tab.")
   if (ok == "ok") {
+  Browser.msgBox("After closing this, please wait until another box pops up after this one, \n before changing anything or closing the tab.");
     try {
       var updatedCount = 0;
       var ss = SpreadsheetApp.getActiveSpreadsheet();
       var sheet = ss.getSheetByName('Device Info');
       var compareTo = ss.getSheetByName('Compare');
-      var filter = sheet.getFilter();
+      try {
+        var filter = sheet.getFilter().getColumnFilterCriteria(1);
+      } catch (e) {
+        Logger.log("Filter is blank: "+ e);
+      }
       try {
         ss.getSheetByName('Device Info').getRange('A1').clearDataValidations();
         ss.getSheetByName('Compare').getRange('A1').clearDataValidations();
@@ -438,6 +448,7 @@ function updateDevices() {
                 AdminDirectory.Chromeosdevices.update(data[i], 'my_customer', data[i].deviceId);
                 //Logger.log("At: " + i + data[i], 'my_customer', data[i].deviceId);
                 updatedCount++;
+                // Browser.msgBox(updatedCount + "\\n" + data[i].deviceId);
               } catch (e) {
                 Logger.log("AdminDirectory error at row: " + (i + 2) + "\nError Msg: " + e);
                 updateFailed = true;
@@ -450,9 +461,12 @@ function updateDevices() {
       if (updateFailed) {
         Browser.msgBox("AdminDirectory update error. \\nCheck Logs.");
       } else {
-        if (updatedCount = 1) {
+        if (updatedCount == 1) {
           Browser.msgBox(updatedCount + " Chrome device was updated in the inventory...");
           Logger.log(updatedCount + " Chrome device was updated in the inventory...");
+        } else if (updatedCount < 1 ){
+          Browser.msgBox(updatedCount + " Chrome devices were updated in the inventory...");
+          Logger.log(updatedCount + " Chrome devices were updated in the inventory...");
         } else {
           Browser.msgBox(updatedCount + " Chrome devices were updated in the inventory...");
           Logger.log(updatedCount + " Chrome devices were updated in the inventory...");
@@ -465,7 +479,11 @@ function updateDevices() {
           setHeader('Device Info');
           setHeader('Compare');
           //Applies back the filtered view the user 
+          try {
           sheet.getRange('A1:A' + sheet.getLastRow()).createFilter().setColumnFilterCriteria(1, filter);
+          } catch (e) {
+            Logger.log("Filter error: " + e);
+          }
           filterSheet('Compare');
           dataVal('Device Info');
           dataVal('Compare');
@@ -490,13 +508,12 @@ function getRowsData(sheet, range, columnHeadersRowIndex) {
 
 function restoreDevices() {
   var ok = Browser.msgBox('Are you sure you want to restore from backup?  This will update the Organizational Unit, Annotated User, Annotated Location, and Notes for all devices back to before the last push.', Browser.Buttons.OK_CANCEL);
-  Browser.msgBox("After closing this, please wait until another box pops up after this one, \n before changing anything or closing the tab.")
   var updatedCount = 0;
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName('Backup');
   if (!isSheetEmpty(sheet)) {
-    Browser.msgBox("Inside IF");
     if (ok == "ok") {
+    Browser.msgBox("After closing this, please wait until another box pops up after this one, \n before changing anything or closing the tab.");
       try {
         try {
           ss.getSheetByName('Backup').getRange('A1').clearDataValidations();
@@ -530,6 +547,7 @@ function restoreDevices() {
                 }
                 AdminDirectory.Chromeosdevices.update(data[i], 'my_customer', data[i].deviceId);
                 updatedCount++;
+                // Browser.msgBox(updatedCount + "\\n" + data[i].deviceId);
               } catch (e) {
                 Logger.log("AdminDirectory error at row: " + (i + 2) + "\nError Msg: " + e);
                 updateFailed = true;
@@ -565,4 +583,88 @@ function restoreDevices() {
 function isSheetEmpty(sheet) {
   // simple check if a sheet is empty or not
   return sheet.getDataRange().getValues().join("") === "";
+}
+
+function forceUpdateDevices() {
+  var ok = Browser.msgBox('Are you sure?  This will update without regard for changes or backup sheet.', Browser.Buttons.OK_CANCEL);
+  if (ok == "ok") {  
+    Browser.msgBox("After closing this, please wait until another box pops up after this one, \n before changing anything or closing the tab.");
+    try {
+      var updatedCount = 0;
+      var ss = SpreadsheetApp.getActiveSpreadsheet();
+      var sheet = ss.getSheetByName('Device Info');
+      try {
+        var filter = sheet.getFilter().getColumnFilterCriteria(1);
+      } catch (e) {
+        Logger.log("Filter is blank: "+ e);
+      }
+      try {
+        ss.getSheetByName('Device Info').getRange('A1').clearDataValidations();
+        ss.getSheetByName('Device Info').getFilter().remove();
+      } catch (e) {
+        Logger.log("Filter already removed.");
+      }
+      try {
+        sanitizeMacInput('Device Info');
+      } catch (e) {
+      }
+      var updateFailed = false;
+      if (sheet.getLastRow() > 1) {
+        var data = getRowsData(sheet);
+        for (var i = 0; i < data.length; i++) {
+          if (data[i].status === "ACTIVE") {
+              data[i].recentUsers = null;
+              try {
+                if (data[i].annotatedAssetId == null) {
+                  data[i].annotatedAssetId = '';
+                }
+                if (data[i].annotatedLocation == null) {
+                  data[i].annotatedLocation = '';
+                }
+                if (data[i].annotatedUser == null) {
+                  data[i].annotatedUser = '';
+                }
+                if (data[i].notes == null) {
+                  data[i].notes = '';
+                }
+                AdminDirectory.Chromeosdevices.update(data[i], 'my_customer', data[i].deviceId);
+                //Logger.log("At: " + i + data[i], 'my_customer', data[i].deviceId);
+                updatedCount++;
+                // Browser.msgBox(updatedCount + "\\n" + data[i].deviceId);
+              } catch (e) {
+                Logger.log("AdminDirectory error at row: " + (i + 2) + "\nError Msg: " + e);
+                updateFailed = true;
+                continue;
+              }
+          }
+        }
+      }
+      if (updateFailed) {
+        Browser.msgBox("AdminDirectory update error. \\nCheck Logs.");
+      } else {
+        if (updatedCount == 1) {
+          Browser.msgBox(updatedCount + " Chrome device was updated in the inventory...");
+          Logger.log(updatedCount + " Chrome device was updated in the inventory...");
+        } else if (updatedCount < 1 ){
+          Browser.msgBox(updatedCount + " Chrome devices were updated in the inventory...");
+          Logger.log(updatedCount + " Chrome devices were updated in the inventory...");
+        } else {
+          Browser.msgBox(updatedCount + " Chrome devices were updated in the inventory...");
+          Logger.log(updatedCount + " Chrome devices were updated in the inventory...");
+        }
+        if (updatedCount >= 0) {
+          setHeader('Device Info');
+          //Applies back the filtered view the user 
+          try {
+          sheet.getRange('A1:A' + sheet.getLastRow()).createFilter().setColumnFilterCriteria(1, filter);
+          } catch (e) {
+            Logger.log("Filter error: " + e);
+          }
+          dataVal('Device Info');
+        }
+      }
+    } catch (err) {
+      Browser.msgBox(err.message);
+    }
+  }
 }
