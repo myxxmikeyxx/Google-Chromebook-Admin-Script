@@ -574,15 +574,13 @@ function restoreDevices() {
         if (updateFailed) {
           Browser.msgBox("AdminDirectory update error. \\nCheck Logs.");
         } else {
-          if (updatedCount = 1) {
-            Browser.msgBox(updatedCount + " Chrome device was updated in the inventory...");
-            Logger.log(updatedCount + " Chrome device was updated in the inventory...");
-          } else {
-            Browser.msgBox(updatedCount + " Chrome devices were updated in the inventory...");
-            Logger.log(updatedCount + " Chrome devices were updated in the inventory...");
-          }
+          Browser.msgBox(updatedCount + " Chrome devices were updated in the inventory... \\n This does not mean all were changed. Just the ones that did not match in admin were changed. They rest just pushed but did nothing.");
+          Logger.log(updatedCount + " Force restore backup, count will not be accurate...");
           if (updatedCount >= 0) {
             hideSheet('Backup');
+            var ok = Browser.msgBox('Would you like to get new chrome device info now? This recommended before making any more changes.', Browser.Buttons.OK_CANCEL);
+    if (ok == "ok") {
+            menuItem2();
           }
         }
       } catch (err) {
@@ -657,16 +655,8 @@ function forceUpdateDevices() {
       if (updateFailed) {
         Browser.msgBox("AdminDirectory update error. \\nCheck Logs.");
       } else {
-        if (updatedCount == 1) {
-          Browser.msgBox(updatedCount + " Chrome device was updated in the inventory...");
-          Logger.log(updatedCount + " Chrome device was updated in the inventory...");
-        } else if (updatedCount < 1 ){
-          Browser.msgBox(updatedCount + " Chrome devices were updated in the inventory...");
-          Logger.log(updatedCount + " Chrome devices were updated in the inventory...");
-        } else {
-          Browser.msgBox(updatedCount + " Chrome devices were updated in the inventory...");
-          Logger.log(updatedCount + " Chrome devices were updated in the inventory...");
-        }
+          Browser.msgBox(updatedCount + " Chrome devices were updated in the inventory... \\n This does not mean all were changed. Just the ones that did not match in admin were changed. They rest just pushed but did nothing.");
+          Logger.log(updatedCount + " Force Resotre backup, count will not be accurate...");
         if (updatedCount >= 0) {
           setHeader('Device Info');
           //Applies back the filtered view the user 
