@@ -385,8 +385,8 @@ function dataVal(sheetName) {
   var sheet = ss.getSheetByName(sheetName);
   // Set the data validation for cell A2 to require a value from A2:A (lastrow - 1). 
   // The -1 is to not count the header row.
-  var cell = sheet.getRange('A2:A' + sheet.getLastRow());
-  var range = sheet.getRange('A2:A' + sheet.getLastRow());
+  var cell = sheet.getRange('A2:A' + (sheet.getLastRow()-1));
+  var range = sheet.getRange('A2:A' + (sheet.getLastRow()-1));
   var rule = SpreadsheetApp.newDataValidation().requireValueInRange(range).build();
   cell.clearDataValidations();
   cell.setDataValidation(rule);
