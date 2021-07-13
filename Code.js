@@ -25,7 +25,9 @@ function onOpen() {
       .addSeparator()
       .addItem('Force Update', 'menuItem6')
       .addSeparator()
-      .addItem('Remove and Add Data Val', 'menuItem7'))
+      .addItem('Remove and Add Data Val', 'menuItem7')
+      .addSeparator()
+      .addItem('Hide Sheets', 'menuItem8'))
     .addSeparator()
     .addToUi();
 }
@@ -95,6 +97,12 @@ function menuItem6() {
 
 function menuItem7() {
   dataVal('Device Info');
+}
+
+function menuItem8() {
+  SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Compare').hideSheet();
+  SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Backup').hideSheet();
+  SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Device Info').activate();
 }
 
 function firstRun() {
@@ -487,7 +495,7 @@ function updateDevices() {
           Browser.msgBox(updatedCount + " Chrome devices were updated in the inventory...");
           Logger.log(updatedCount + " Chrome devices were updated in the inventory...");
         }
-        if (updatedCount >= 0) {
+        if (updatedCount > 0) {
           //Makes a Backup
           copyToSheet('Compare', 'Backup');
           //Updates compare so next update it saves time and tries to update only changed device info
