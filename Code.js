@@ -44,6 +44,7 @@ function menuItem1() {
   filterSheet('Device Info');
   dataVal('Device Info');
   hideSheet('Compare');
+  SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Device Info').activate();
 }
 
 function menuItem2() {
@@ -512,8 +513,8 @@ function updateDevices() {
           dataVal('Device Info');
           dataVal('Compare');
           dataVal('Backup');
-          hideSheet('Compare');
-          hideSheet('Backup');
+          // Hides both the compare and the backup sheet
+          menuItem8();
         }
       }
     } catch (err) {
