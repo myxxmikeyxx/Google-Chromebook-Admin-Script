@@ -42,7 +42,7 @@ function menuItem1() {
   }
   setHeader('Device Info');
   filterSheet('Device Info');
-  dataVal('Device Info');
+  // Removed dataVal because it does not have enough rows and throws and error on first run
   hideSheet('Compare');
   SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Device Info').activate();
 }
@@ -299,11 +299,12 @@ function clearSheet(sheetName) {
   } catch (e) { }
   // Make sure it has at least 100 rows
   if (maxRow < 0) {
-    sheet.insertRows(maxRow, 2 - maxRow);
-  } else if (maxRow == 2) {
+    sheet.insertRows(maxRow, 3 - maxRow);
+  } else if (maxRow == 3) {
     // Do nothing
   } else {
-    sheet.deleteRows(2, maxRow - 2);
+    //Leaves 3 rows
+    sheet.deleteRows(3, maxRow - 3);
   }
   // Makes sure it has all headers and one free space
   if (maxColumn < letterToColumn('U')) {
@@ -311,7 +312,8 @@ function clearSheet(sheetName) {
   } else if (maxColumn == letterToColumn('U')) {
     // Do nothing
   } else {
-    sheet.deleteColumns(letterToColumn('U'), maxColumn - letterToColumn('U'));
+    // Range is out of bounds
+    sheet.deleteColumns(letterToColumn('U'), (maxColumn - letterToColumn('U')));
   }
   SpreadsheetApp.flush();
 }
@@ -385,8 +387,8 @@ function dataVal(sheetName) {
   var sheet = ss.getSheetByName(sheetName);
   // Set the data validation for cell A2 to require a value from A2:A (lastrow - 1). 
   // The -1 is to not count the header row.
-  var cell = sheet.getRange('A2:A' + (sheet.getLastRow()-1));
-  var range = sheet.getRange('A2:A' + (sheet.getLastRow()-1));
+  var cell = sheet.getRange('A2:A' + (sheet.getLastRow()));
+  var range = sheet.getRange('A2:A' + (sheet.getLastRow()));
   var rule = SpreadsheetApp.newDataValidation().requireValueInRange(range).build();
   cell.clearDataValidations();
   cell.setDataValidation(rule);
