@@ -17,19 +17,25 @@ https://stackoverflow.com/questions/58737436/how-to-create-a-good-looking-notifi
 | :exclamation: USE AT OWN RISK :exclamation: |
 |---------------------------------------------|
 
-### Table of Contents
-**[Installation Instructions](#installation-instructions)**<br>
-****[Installation Instructions](#installation-instructions)**<br>
-**[Usage Instructions](#usage-instructions)**<br>
-**[Troubleshooting](#troubleshooting)**<br>
-**[Compatibility](#compatibility)**<br>
-**[Notes and Miscellaneous](#notes-and-miscellaneous)**<br>
-**[Building the Extension Bundles](#building-the-extension-bundles)**<br>
-**[Next Steps, Credits, Feedback, License](#next-steps)**<br>
 
-## Installation Instructions
+Table of contents
+=================
 
-### - Clasp
+<!--ts-->
+   * [Installation](#installation)
+      * [Clasp](#clasp)
+      * [Copy](#copy)
+   * [Usage](#usage)
+   * [Dependency](#dependency)
+   * [Docker](#docker)
+     * [Local](#local)
+<!--te-->
+
+Installation
+============
+
+Clasp
+-----
 
 1. Install Node.js
 
@@ -39,7 +45,7 @@ https://stackoverflow.com/questions/58737436/how-to-create-a-good-looking-notifi
 
 4. Verify you have Google Apps Script API enabled [here](https://script.google.com/home/usersettings).
 
-5. Download latest release zip and extract.
+5. Download latest release [here](/releases/latest) and extract it.
 
 6. Open terminal/cmd/power shell in project folder.
 
@@ -61,8 +67,22 @@ https://stackoverflow.com/questions/58737436/how-to-create-a-good-looking-notifi
 11. Now click the sheet. This will take you to the sheet the script is attached to. From here rename it to whatever you want.
 
 
-### - Copy
+Copy
+----
+1. Download latest release [here](/releases/latest) and extract it.
 
-## Usage Instructions
+2. Open a new google sheets document and name it.
+
+3. In the tool bar click ```Tools > Script Editor```.
+
+4. In ```Apps Script``` rename the script at the top.
+
+5. Copy and paste all of code.js into the code file, replacing everything.
+6. In the Files location click the + and chose script.
+7. Name one "columnRelation" & another "rowsData".
+8. Copy the script into the respective ones.
+
+Usage
+=====
 
 This script is for getting active chrome devices. Sorting them, adding and changing fields, and moving OU's. 
