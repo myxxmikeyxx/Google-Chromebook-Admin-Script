@@ -5,14 +5,21 @@
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
       rel="stylesheet">
 
+<!-- 
+https://wordpress.com/support/markdown-quick-reference/
 
-https://stackoverflow.com/questions/58737436/how-to-create-a-good-looking-notification-or-warning-box-in-github-flavoured-mar
-### :exclamation: USE AT OWN RISK :exclamation:
+https://marketplace.visualstudio.com/items?itemName=bierner.markdown-preview-github-styles
 
-| :exclamation:  This is very important   |
-|-----------------------------------------|
+https://gist.github.com/rxaviers/7360908
+
+https://stackoverflow.com/questions/58737436/how-to-create-a-good-looking-notification-or-warning-box-in-github-flavoured-mar -->
+
+| :exclamation: USE AT OWN RISK :exclamation: |
+|---------------------------------------------|
+
 ### Table of Contents
 **[Installation Instructions](#installation-instructions)**<br>
+****[Installation Instructions](#installation-instructions)**<br>
 **[Usage Instructions](#usage-instructions)**<br>
 **[Troubleshooting](#troubleshooting)**<br>
 **[Compatibility](#compatibility)**<br>
@@ -21,6 +28,8 @@ https://stackoverflow.com/questions/58737436/how-to-create-a-good-looking-notifi
 **[Next Steps, Credits, Feedback, License](#next-steps)**<br>
 
 ## Installation Instructions
+
+### - Clasp
 
 1. Install Node.js
 
@@ -50,6 +59,9 @@ https://stackoverflow.com/questions/58737436/how-to-create-a-good-looking-notifi
 10. Click the <span class="material-icons">info</span> in the upper left. 
 
 11. Now click the sheet. This will take you to the sheet the script is attached to. From here rename it to whatever you want.
+
+
+### - Copy
 
 ## Usage Instructions
 
