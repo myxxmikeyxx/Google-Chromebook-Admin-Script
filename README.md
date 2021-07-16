@@ -26,9 +26,10 @@ Table of contents
       * [Clasp](#clasp)
       * [Copy](#copy)
    * [Usage](#usage)
-   * [Dependency](#dependency)
-   * [Docker](#docker)
-     * [Local](#local)
+   * [Resources](#resources)
+     * [Andrew Stillman](#andrew-stillman)
+     * [mhawksey](#mhawksey)
+     * [Adam L](#adam-l)
 <!--te-->
 
 Installation
@@ -86,3 +87,21 @@ Usage
 =====
 
 This script is for getting active chrome devices. Sorting them, adding and changing fields, and moving OU's. 
+
+
+Resources
+=========
+I would like to thank everyone below for the great scripts that I was able to use and tweak to make this project happen.
+
+[Andrew Stillman](https://www.linkedin.com/in/astillman)
+---------------
+Script & Spreadsheet [here](http://chromebookedu.blogspot.com/2014/02/a-new-script-for-chromebook-admins-via.html).
+This script was what I used as a base to make mine. I had to change a lot of stuff and later just went in my own direction, but the main get devices and update devices parts are from his script with minor tweaks.
+
+[mhawksey](https://github.com/mhawksey)
+----------
+The orginal script can be found [here](https://gist.github.com/mhawksey/51a1501493787bc5b7f1). I ended up tweaking it a bit to make it so the users and not an array of recent users. I also made it only show "ACTIVE" devices. (Google admin keeps deprovisoned device info for a while after they have been deprovisioned, and the get devices would show all devices without this change).
+
+[Adam L.](https://stackoverflow.com/users/1373663/adaml)
+-------
+I used his script for letter to column & column to letter. The post I found it on is [here](https://stackoverflow.com/questions/21229180/convert-column-index-into-corresponding-column-letter). This script was not changed, plus it was very useful.
