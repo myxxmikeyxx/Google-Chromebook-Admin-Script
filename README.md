@@ -69,7 +69,7 @@ Clasp
 
 Copy
 ----
-1. Download latest release [here](/releases/latest) and extract it.
+1. Download latest release [here](/myxxmikeyxx/Google-Chromebook-Admin-Script/releases/latest/download/) and extract it.
 
 2. Open a new google sheets document and name it.
 
