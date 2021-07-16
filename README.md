@@ -45,7 +45,7 @@ Clasp
 
 4. Verify you have Google Apps Script API enabled [here](https://script.google.com/home/usersettings).
 
-5. Download latest release [here](/releases/latest) and extract it.
+5. Download latest release [here](https://github.com/myxxmikeyxx/Google-Chromebook-Admin-Script/releases/latest) and extract it.
 
 6. Open terminal/cmd/power shell in project folder.
 
@@ -69,7 +69,7 @@ Clasp
 
 Copy
 ----
-1. Download latest release [here](/releases/latest) and extract it.
+1. Download latest release [here](https://github.com/myxxmikeyxx/Google-Chromebook-Admin-Script/releases/latest) and extract it.
 
 2. Open a new google sheets document and name it.
 
