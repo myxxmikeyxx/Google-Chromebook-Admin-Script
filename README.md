@@ -64,13 +64,13 @@ Clasp
    clasp create cbManagement
    </pre>
 
-7. Select sheets for where you want the script to install to.
+7. Select **sheets** for where you want the script to install to.
 
 8. Do the following commands: 
    <pre>
    clasp push
    clasp open
-   </pre> This will open the script.
+   </pre> This will push it to google script, then open the script.
 
 9. Click the <span class="material-icons">info</span> in the upper left. 
 
