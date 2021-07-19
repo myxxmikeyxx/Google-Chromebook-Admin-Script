@@ -30,6 +30,8 @@ Table of contents
      * [Andrew Stillman](#andrew-stillman)
      * [mhawksey](#mhawksey)
      * [Adam L](#adam-l)
+   * [Troubleshooting](#troubleshooting)
+     * [PowerShell](#powershell)
 <!--te-->
 
 Installation
@@ -38,34 +40,41 @@ Installation
 Clasp
 -----
 
-1. Install Node.js
+1. Install Node.js from [here](https://nodejs.org/en/). The version must be at least 4.7.4.
 
 2. Follow google developers directions to install clasp from Node.js [here](https://developers.google.com/apps-script/guides/clasp#requirements).
 
-3. Follow clasp login directions.
+3. Verify you have Google Apps Script API enabled [here](https://script.google.com/home/usersettings).
 
-4. Verify you have Google Apps Script API enabled [here](https://script.google.com/home/usersettings).
+4. Download latest release [here](https://github.com/myxxmikeyxx/Google-Chromebook-Admin-Script/releases/latest) and extract it.
 
-5. Download latest release [here](https://github.com/myxxmikeyxx/Google-Chromebook-Admin-Script/releases/latest) and extract it.
+5. Open terminal/cmd/power shell **inside project folder**. (In Visual Studio Code do Ctrl+Shift+`)
 
-6. Open terminal/cmd/power shell in project folder.
-
-7. Do the following command: 
+6. Do the following commands: 
+   * Create package.json (Doesn't really matter what you make it, just is needed for clasp login step):
+   <pre>
+   npm init
+   </pre>
+   * Clasp login:
+   <pre>
+   clasp login
+   </pre>
+   * Create Google Sheet with script attached:
    <pre>
    clasp create cbManagement
    </pre>
 
-8. Select sheets for where you want the script to install to.
+7. Select sheets for where you want the script to install to.
 
-9. Do the following command: 
+8. Do the following commands: 
    <pre>
    clasp push
    clasp open
    </pre> This will open the script.
 
-10. Click the <span class="material-icons">info</span> in the upper left. 
+9. Click the <span class="material-icons">info</span> in the upper left. 
 
-11. Now click the sheet. This will take you to the sheet the script is attached to. From here rename it to whatever you want.
+10. Now click the sheet. This will take you to the sheet the script is attached to. From here rename it to whatever you want.
 
 
 Copy
@@ -105,3 +114,13 @@ The orginal script can be found [here](https://gist.github.com/mhawksey/51a15014
 [Adam L.](https://stackoverflow.com/users/1373663/adaml)
 -------
 I used his script for letter to column & column to letter. The post I found it on is [here](https://stackoverflow.com/questions/21229180/convert-column-index-into-corresponding-column-letter). This script was not changed, plus it was very useful.
+
+
+Troubleshooting
+================
+
+PowerShell
+----------
+If you are getting "Execution Policy" error in PowerShell try [here](https://tecadmin.net/powershell-running-scripts-is-disabled-system/) for help.
+
+
