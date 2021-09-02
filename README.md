@@ -91,7 +91,7 @@ Copy
 4. In ```Apps Script``` rename the script at the top.
 
 5. Copy and paste all of code.js into the code file, replacing everything.
-6. In the Files location click the + and chose script.
+6. In the Files location click the <i class="material-icons">add</i> and chose script.
 7. Name one "columnRelation" & another "rowsData".
 8. Copy the script into the respective ones.
 
