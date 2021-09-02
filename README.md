@@ -6,7 +6,10 @@
       rel="stylesheet">
 
 <!-- 
+<span class="material-icons-outlined">info</span>
+<span class="material-icons-outlined"> alarm </span>
 <i class="material-icons">code</i>
+<i class="material-icons">add</i>
 https://fonts.google.com/icons
 
 https://wordpress.com/support/markdown-quick-reference/
