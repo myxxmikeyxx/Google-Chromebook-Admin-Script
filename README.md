@@ -2,10 +2,13 @@
 
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
       rel="stylesheet">
-<link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+<link href="//fonts.googleapis.com/css2?family=Material+Icons+Outlined"
       rel="stylesheet">
 
 <!-- 
+<i class="material-icons">code</i>
+https://fonts.google.com/icons
+
 https://wordpress.com/support/markdown-quick-reference/
 
 https://marketplace.visualstudio.com/items?itemName=bierner.markdown-preview-github-styles
@@ -72,7 +75,7 @@ Clasp
    clasp open
    </pre> This will push it to google script, then open the script.
 
-9. Click the <span class="material-icons">info</span> in the upper left. 
+9. Click the <span class="material-icons-outlined">info</span> in the upper left. 
 
 10. Now click the sheet. This will take you to the sheet the script is attached to. From here rename it to whatever you want.
 
