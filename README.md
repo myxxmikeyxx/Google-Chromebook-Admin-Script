@@ -75,7 +75,7 @@ Clasp
    clasp open
    </pre> This will push it to google script, then open the script.
 
-9. Click the <span class="material-icons-outlined">info</span> in the upper left. 
+9. Click the ![info](images/1x/outline_info_white_18dp.png) in the upper left.  
 
 10. Now click the sheet. This will take you to the sheet the script is attached to. From here rename it to whatever you want.
 
@@ -86,12 +86,12 @@ Copy
 
 2. Open a new google sheets document and name it.
 
-3. In the tool bar click ```Tools > Script Editor```.
+3. In the tool bar click ```Tools >``` ![code](images/1x/outline_code_white_18dp.png) ```Script Editor```.
 
 4. In ```Apps Script``` rename the script at the top.
 
 5. Copy and paste all of code.js into the code file, replacing everything.
-6. In the Files location click the <span class="material-icons">add</span> and chose script.
+6. In the Files location click the ![add](images/1x/outline_add_white_18dp.png)  and chose script.
 7. Name one "columnRelation" & another "rowsData".
 8. Copy the script into the respective ones.
 
