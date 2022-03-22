@@ -587,7 +587,7 @@ function restoreDevices() {
         if (updateFailed) {
           Browser.msgBox("AdminDirectory update error. \\nCheck Logs.");
         } else {
-          Browser.msgBox(updatedCount + " Chrome devices were updated in the inventory... \\n This does not mean all were changed. Just the ones that did not match in admin were changed. They rest just pushed but did nothing.");
+          Browser.msgBox(updatedCount + " Chrome devices were updated in the inventory... \\n This does not mean all were changed. Just the ones that did not match in admin were changed. The rest just pushed but did nothing.");
           Logger.log(updatedCount + " Force restore backup, count will not be accurate...");
           if (updatedCount >= 0) {
             hideSheet('Backup');
